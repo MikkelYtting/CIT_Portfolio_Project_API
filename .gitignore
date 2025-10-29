@@ -1,0 +1,45 @@
+# .NET build output
+bin/
+obj/
+
+# Visual Studio cache and settings
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Visual Studio Code workspace settings (optional)
+.vscode/
+
+# ReSharper/JetBrains Rider
+_ReSharper*/
+*.[Rr]e[Ss]harper
+*.DotSettings.user
+.idea/
+*.sln.iml
+
+# Test results
+[Tt]est[Rr]esult*/
+[Tt]est[Rr]esults/
+*.coverage
+*.coveragexml
+
+# BenchmarkDotNet
+BenchmarkDotNet.Artifacts/
+
+# NuGet
+*.nupkg
+# Packages folder can be used in older solutions; usually restore is used
+packages/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Others
+*.log
+*.cache
+
+# ASP.NET scaffolding
+ScaffoldingReadMe.txt
