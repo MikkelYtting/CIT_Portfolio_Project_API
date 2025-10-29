@@ -43,3 +43,8 @@ Thumbs.db
 
 # ASP.NET scaffolding
 ScaffoldingReadMe.txt
+
+# Environment files (secrets)
+.env
+.env.*
+!.env.example

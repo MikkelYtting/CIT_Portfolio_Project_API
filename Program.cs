@@ -12,6 +12,7 @@ using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using DotNetEnv;
 using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -26,9 +27,32 @@ builder.Services.AddProblemDetails();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// Load .env (optional). If .env is missing, Env.Load() is a no-op and we'll fall back to appsettings.json.
+Env.Load();
+
+// Build connection string from environment variables; if missing, fall back to appsettings.json
+string? host = Environment.GetEnvironmentVariable("POSTGRES_HOST");
+string? port = Environment.GetEnvironmentVariable("POSTGRES_PORT");
+string? db   = Environment.GetEnvironmentVariable("POSTGRES_DB");
+string? user = Environment.GetEnvironmentVariable("POSTGRES_USER");
+string? pw   = Environment.GetEnvironmentVariable("POSTGRES_PASSWORD");
+
+string connectionString;
+if (!string.IsNullOrWhiteSpace(host) && !string.IsNullOrWhiteSpace(port)
+	&& !string.IsNullOrWhiteSpace(db) && !string.IsNullOrWhiteSpace(user)
+	&& !string.IsNullOrWhiteSpace(pw))
+{
+	connectionString = $"Host={host};Port={port};Database={db};Username={user};Password={pw}";
+}
+else
+{
+	connectionString = builder.Configuration.GetConnectionString("Default")
+						?? throw new InvalidOperationException("Connection string 'Default' not found.");
+}
+
 // EF Core - Npgsql
 builder.Services.AddDbContext<AppDbContext>(options =>
-	options.UseNpgsql(builder.Configuration.GetConnectionString("Default"))
+	options.UseNpgsql(connectionString)
 		   .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking));
 
 // AutoMapper
