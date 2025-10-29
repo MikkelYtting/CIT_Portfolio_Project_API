@@ -38,9 +38,9 @@ public class MovieRepository : IMovieRepository
 
     public async Task<PageDto<MovieDto>> SearchAsync(string queryText, int page, int pageSize, CancellationToken ct = default)
     {
-        // Delegate to DB function through SearchRepository in real implementation
-        // TODO: Move to SearchRepository; kept simple here to compile
-        var rows = await _db.CallStringSearch(0, queryText).ToListAsync(ct);
+        // Use a known valid user id for logging search history in DB functions.
+        // TODO: Plumb authenticated user id or delegate to SearchRepository.
+        var rows = await _db.CallStringSearch(1, queryText).ToListAsync(ct);
         var total = rows.Count;
         var items = rows.Skip((page - 1) * pageSize).Take(pageSize)
             .Select(r => new MovieDto { Tconst = r.Tconst, Title = r.Title });
@@ -49,7 +49,7 @@ public class MovieRepository : IMovieRepository
 
     public async Task<PageDto<MovieDto>> StructuredSearchAsync(string? title, string? plot, string? characters, string? person, int page, int pageSize, CancellationToken ct = default)
     {
-        var rows = await _db.CallStructuredStringSearch(0, title, plot, characters, person).ToListAsync(ct);
+        var rows = await _db.CallStructuredStringSearch(1, title, plot, characters, person).ToListAsync(ct);
         var total = rows.Count;
         var items = rows.Skip((page - 1) * pageSize).Take(pageSize)
             .Select(r => new MovieDto { Tconst = r.Tconst, Title = r.Title });

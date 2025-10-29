@@ -6,6 +6,12 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
+  <!-- Exclude the nested integration test project sources from this app project build -->
+  <ItemGroup>
+    <Compile Remove="test\**\*.cs" />
+    <None Include="test\**\*" Exclude="test\**\bin\**;test\**\obj\**" />
+  </ItemGroup>
+
   
 
   <ItemGroup>

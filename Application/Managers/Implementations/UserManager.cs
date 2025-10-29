@@ -15,11 +15,11 @@ public class UserManager : IUserManager
     public UserManager(IUserRepository repo, PasswordHasher hasher, IMapper mapper)
     { _repo = repo; _hasher = hasher; _mapper = mapper; }
 
-    public async Task<UserDto> RegisterAsync(string username, string password, CancellationToken ct = default)
+    public async Task<UserDto> RegisterAsync(string username, string email, string password, CancellationToken ct = default)
     {
         var existing = await _repo.GetByUsernameAsync(username, ct);
         if (existing != null) throw new InvalidOperationException("Username already exists");
-        var user = new User { Username = username, PasswordHash = _hasher.Hash(password) };
+        var user = new User { Username = username, Email = email, PasswordHash = _hasher.Hash(password) };
         user = await _repo.AddAsync(user, ct);
         var dto = _mapper.Map<UserDto>(user);
         dto.Links.Add(new DTOs.LinkDto("self", $"/api/users/{dto.Id}"));

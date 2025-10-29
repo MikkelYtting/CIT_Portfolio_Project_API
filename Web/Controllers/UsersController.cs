@@ -10,12 +10,12 @@ public class UsersController : ControllerBase
     private readonly IUserManager _manager;
     public UsersController(IUserManager manager) { _manager = manager; }
 
-    public record RegisterRequest(string Username, string Password);
+    public record RegisterRequest(string Username, string Email, string Password);
 
     [HttpPost]
     public async Task<IActionResult> Register([FromBody] RegisterRequest request, CancellationToken ct)
     {
-    var dto = await _manager.RegisterAsync(request.Username, request.Password, ct);
+    var dto = await _manager.RegisterAsync(request.Username, request.Email, request.Password, ct);
         return Created($"/api/users/{dto.Id}", dto);
     }
 

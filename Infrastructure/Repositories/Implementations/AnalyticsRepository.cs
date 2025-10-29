@@ -23,8 +23,26 @@ public class AnalyticsRepository : IAnalyticsRepository
         => _db.CallCoPlayers(actor).ToListAsync(ct).ContinueWith(t => (IEnumerable<CoPlayerRow>)t.Result, ct);
 
     public Task<IEnumerable<ExactMatchRow>> ExactMatchAsync(string query, CancellationToken ct = default)
-        => _db.CallExactMatch(query).ToListAsync(ct).ContinueWith(t => (IEnumerable<ExactMatchRow>)t.Result, ct);
+    {
+        var parts = (query ?? string.Empty)
+            .Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Take(3)
+            .ToArray();
+        string? w1 = parts.ElementAtOrDefault(0);
+        string? w2 = parts.ElementAtOrDefault(1);
+        string? w3 = parts.ElementAtOrDefault(2);
+        return _db.CallExactMatch(w1, w2, w3).ToListAsync(ct).ContinueWith(t => (IEnumerable<ExactMatchRow>)t.Result, ct);
+    }
 
     public Task<IEnumerable<BestMatchRow>> BestMatchAsync(string query, CancellationToken ct = default)
-        => _db.CallBestMatch(query).ToListAsync(ct).ContinueWith(t => (IEnumerable<BestMatchRow>)t.Result, ct);
+    {
+        var parts = (query ?? string.Empty)
+            .Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Take(3)
+            .ToArray();
+        string? w1 = parts.ElementAtOrDefault(0);
+        string? w2 = parts.ElementAtOrDefault(1);
+        string? w3 = parts.ElementAtOrDefault(2);
+        return _db.CallBestMatch(w1, w2, w3).ToListAsync(ct).ContinueWith(t => (IEnumerable<BestMatchRow>)t.Result, ct);
+    }
 }

@@ -66,6 +66,57 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<ExactMatchRow>().HasNoKey();
         modelBuilder.Entity<BestMatchRow>().HasNoKey();
         modelBuilder.Entity<CoPlayerRow>().HasNoKey();
+
+        // Map entities to actual table/column names from the provided SQL scripts
+        modelBuilder.Entity<Movie>(entity =>
+        {
+            entity.ToTable("movies");
+            entity.Property(e => e.Tconst).HasColumnName("tconst");
+            // Store display title from 'primaryTitle' column (folded to lowercase 'primarytitle')
+            entity.Property(e => e.Title).HasColumnName("primarytitle");
+        });
+
+        modelBuilder.Entity<Rating>(entity =>
+        {
+            entity.ToTable("ratings");
+            entity.Property(e => e.Tconst).HasColumnName("tconst");
+            entity.Property(e => e.AverageRating).HasColumnName("averagerating");
+            entity.Property(e => e.NumVotes).HasColumnName("numvotes");
+        });
+
+        modelBuilder.Entity<Person>(entity =>
+        {
+            entity.ToTable("persons");
+            entity.Property(e => e.Nconst).HasColumnName("nconst");
+            entity.Property(e => e.Name).HasColumnName("primaryname");
+        });
+
+        modelBuilder.Entity<MoviePerson>(entity =>
+        {
+            entity.ToTable("movie_people");
+            entity.Property(e => e.Tconst).HasColumnName("tconst");
+            entity.Property(e => e.Nconst).HasColumnName("nconst");
+            entity.Property(e => e.Category).HasColumnName("category");
+        });
+
+        modelBuilder.Entity<MovieGenre>(entity =>
+        {
+            entity.ToTable("movie_genres");
+            entity.Property(e => e.Tconst).HasColumnName("tconst");
+            entity.Property(e => e.Genre).HasColumnName("genre");
+        });
+
+        modelBuilder.Entity<User>(entity =>
+        {
+            entity.ToTable("users");
+            entity.Property(e => e.Id).HasColumnName("user_id").ValueGeneratedOnAdd();
+            entity.Property(e => e.Username).HasColumnName("username");
+            entity.Property(e => e.Email).HasColumnName("email");
+            entity.Property(e => e.PasswordHash).HasColumnName("password_hash");
+            // NOTE: The DB schema requires 'email' (NOT NULL). Our entity doesn't include it yet.
+            // Register endpoint will need an Email field and to use either direct insert including email
+            // or the 'create_user' function from D_functions.sql.
+        });
     }
 
     // Function-call helpers (examples using FromSqlInterpolated)
@@ -97,9 +148,9 @@ public class AppDbContext : DbContext
     public IQueryable<CoPlayerRow> CallCoPlayers(string actor)
         => CoPlayerRows.FromSqlInterpolated($"select * from co_players({actor})");
 
-    public IQueryable<ExactMatchRow> CallExactMatch(string query)
-        => ExactMatchRows.FromSqlInterpolated($"select * from exact_match_query({query})");
+    public IQueryable<ExactMatchRow> CallExactMatch(string? w1, string? w2 = null, string? w3 = null)
+        => ExactMatchRows.FromSqlInterpolated($"select * from exact_match_query({w1}, {w2}, {w3})");
 
-    public IQueryable<BestMatchRow> CallBestMatch(string query)
-        => BestMatchRows.FromSqlInterpolated($"select * from best_match_query({query})");
+    public IQueryable<BestMatchRow> CallBestMatch(string? w1, string? w2 = null, string? w3 = null)
+        => BestMatchRows.FromSqlInterpolated($"select * from best_match_query({w1}, {w2}, {w3})");
 }

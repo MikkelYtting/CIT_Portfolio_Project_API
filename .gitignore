@@ -24,6 +24,10 @@ _ReSharper*/
 [Tt]est[Rr]esults/
 *.coverage
 *.coveragexml
+*.trx
+
+# Centralized build/test outputs
+[Aa]rtifacts/
 
 # BenchmarkDotNet
 BenchmarkDotNet.Artifacts/
