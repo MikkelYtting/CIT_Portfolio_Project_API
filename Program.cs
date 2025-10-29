@@ -114,7 +114,12 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
 	app.UseSwagger();
-	app.UseSwaggerUI();
+	app.UseSwaggerUI(c =>
+	{
+		c.SwaggerEndpoint("/swagger/v1/swagger.json", "CIT Portfolio API v1");
+		// Serve Swagger UI at application root ('/')
+		c.RoutePrefix = string.Empty;
+	});
 }
 
 app.UseHttpsRedirection();
@@ -125,5 +130,9 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+// Optional: If you prefer Swagger UI under /swagger instead of root,
+// comment the RoutePrefix setting above and uncomment this redirect:
+// app.MapGet("/", () => Results.Redirect("/swagger"));
 
 app.Run();
