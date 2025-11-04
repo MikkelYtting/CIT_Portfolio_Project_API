@@ -67,6 +67,8 @@ public class MovieDetailTests
     [DataRow(null)]
     [DataRow(0)]
     [DataRow(1)]
+    [DataRow(int.MaxValue - 2)]
+    [DataRow(int.MaxValue - 1)]
     [DataRow(int.MaxValue)]
     public void MovieDetail_RuntimeMinutes_ShouldPass(int? runtime)
     {

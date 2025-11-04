@@ -46,6 +46,8 @@ public class UserRatingTests
     [DataTestMethod]
     [DataRow(1)]
     [DataRow(2)]
+    [DataRow(int.MaxValue - 2)]
+    [DataRow(int.MaxValue - 1)]
     [DataRow(int.MaxValue)]
     public void UserRating_UserId_ShouldPass(int userId)
     {
@@ -61,6 +63,7 @@ public class UserRatingTests
     [DataTestMethod]
     [DataRow(0)]
     [DataRow(-1)]
+    [DataRow(-2)]
     public void UserRating_UserId_ShouldFail(int userId)
     {
         // Arrange

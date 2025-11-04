@@ -93,6 +93,8 @@ public class RatingTests
     [DataRow(0)]
     [DataRow(1)]
     [DataRow(42)]
+    [DataRow(int.MaxValue - 2)]
+    [DataRow(int.MaxValue - 1)]
     [DataRow(int.MaxValue)]
     public void Rating_NumVotes_ShouldPass(int votes)
     {

@@ -77,6 +77,8 @@ public class UserSearchHistoryTests
     [DataRow(3)] // next to boundary
     [DataRow(10)] // small positive
     [DataRow(100)] // larger value
+    [DataRow(int.MaxValue - 2)]
+    [DataRow(int.MaxValue - 1)]
     [DataRow(int.MaxValue)] // extreme positive
     /// <summary>
     /// Positive testcases for UserId (Range: [1, int.MaxValue]).

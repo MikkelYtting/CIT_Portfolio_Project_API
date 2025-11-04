@@ -45,6 +45,8 @@ public class UserBookmarkTests
     [DataTestMethod]
     [DataRow(1)]
     [DataRow(10)]
+    [DataRow(int.MaxValue - 2)]
+    [DataRow(int.MaxValue - 1)]
     [DataRow(int.MaxValue)]
     public void UserBookmark_UserId_ShouldPass(int userId)
     {
@@ -60,6 +62,7 @@ public class UserBookmarkTests
     [DataTestMethod]
     [DataRow(0)]
     [DataRow(-1)]
+    [DataRow(-2)]
     public void UserBookmark_UserId_ShouldFail(int userId)
     {
         // Arrange
