@@ -1,6 +1,7 @@
+using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using CIT_Portfolio_Project_API.Models.Entities;
-using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace CIT_Portfolio_Project_API.UnitTests.Models;
@@ -8,50 +9,89 @@ namespace CIT_Portfolio_Project_API.UnitTests.Models;
 [TestClass]
 public class MovieTests
 {
-    [DataTestMethod]
-    [DataRow("tt123")] // min regex: 'tt' + 3 digits
-    [DataRow("tt1234567890")] // within length <= 20
-    public void Tconst_Positive(string tconst)
+    private Movie CreateMovie(string? tconst, string? title) => new Movie
     {
-        var m = new Movie { Tconst = tconst, Title = "The Dark Knight" };
-        var results = ValidationHelper.Validate(m);
-        results.Should().BeEmpty();
+        Tconst = tconst!,
+        Title = title
+    };
+
+    private bool TryValidateModel(object model, out ICollection<ValidationResult> results)
+    {
+        var ctx = new ValidationContext(model);
+        results = new List<ValidationResult>();
+        return Validator.TryValidateObject(model, ctx, results, validateAllProperties: true);
+    }
+
+    // Tconst: required, regex tt\d{3,}, length <= 20
+    [DataTestMethod]
+    [DataRow("tt123")] // min regex
+    [DataRow("tt000")] // min digits with zeros
+    [DataRow("tt1234")] // more digits still valid
+    [DataRow("tt123456789012345678")] // <= 20 chars
+    public void Movie_Tconst_ShouldPass(string tconst)
+    {
+        // Arrange
+        var model = CreateMovie(tconst, "The Dark Knight");
+        // Act
+        var ok = TryValidateModel(model, out var results);
+        // Assert
+        Assert.IsTrue(ok);
+        Assert.AreEqual(0, results.Count);
     }
 
     [DataTestMethod]
-    [DataRow(null)] // required violation
-    [DataRow("")] // empty not allowed
-    [DataRow("nm123")] // wrong prefix (should be 'tt')
-    [DataRow("tt12")] // too short: needs >= 3 digits
-    [DataRow("tt12345678901234567890")] // length > 20
-    public void Tconst_Negative(string? tconst)
+    [DataRow(null)]
+    [DataRow("")]
+    [DataRow("nm123")] // wrong prefix
+    [DataRow("tt12")] // too short
+    [DataRow("tt12345678901234567890")] // > 20
+    [DataRow("TT123")] // uppercase prefix should fail regex
+    [DataRow(" tt123")] // leading space invalid
+    [DataRow("tt123 ")] // trailing space invalid
+    [DataRow("tt12x")] // non-digit character
+    public void Movie_Tconst_ShouldFail(string? tconst)
     {
-        var m = new Movie { Tconst = tconst!, Title = "x" };
-        var results = ValidationHelper.Validate(m);
-        results.Should().NotBeEmpty();
+        // Arrange
+        var model = CreateMovie(tconst, "x");
+        // Act
+        var ok = TryValidateModel(model, out var results);
+        // Assert
+        Assert.IsFalse(ok);
+        Assert.IsTrue(results.Count > 0);
+    }
+
+    // Title: optional, length <= 512
+    [DataTestMethod]
+    [DataRow("")]
+    [DataRow("123")]
+    [DataRow("valid title")]
+    [DataRow("x")]
+    [DataRow(null)]
+    public void Movie_Title_ShouldPass(string? value)
+    {
+        // Arrange
+        var model = CreateMovie("tt123", value);
+        // Act
+        var ok = TryValidateModel(model, out var results);
+        // Assert
+        Assert.IsTrue(ok);
+        Assert.AreEqual(0, results.Count);
     }
 
     [DataTestMethod]
-    [DataRow("")] // empty title allowed
-    [DataRow("123")] // numeric string allowed
-    [DataRow("valid title")] // typical title
-    [DataRow("x")] // 1 char title
-    [DataRow(null)] // optional
-    public void Title_Positive(string? value)
+    [DataRow(513)]
+    [DataRow(1024)]
+    public void Movie_Title_ShouldFail(int length)
     {
-        var m = new Movie { Tconst = "tt123", Title = value };
-        var results = ValidationHelper.Validate(m);
-        results.Should().BeEmpty();
-    }
-
-    [DataTestMethod]
-    [DataRow(513)] // just above max 512
-    [DataRow(514)] // further above max
-    public void Title_Negative_Length_Too_Long(int length)
-    {
+        // Arrange
         var title = new string('a', length);
-        var m = new Movie { Tconst = "tt123", Title = title };
-        var results = ValidationHelper.Validate(m);
-        results.Should().ContainSingle(r => r.MemberNames.Contains("Title"));
+        var model = CreateMovie("tt123", title);
+        // Act
+        var ok = TryValidateModel(model, out var results);
+        // Assert
+        Assert.IsFalse(ok);
+        Assert.IsTrue(results.Count > 0);
     }
+
+    
 }

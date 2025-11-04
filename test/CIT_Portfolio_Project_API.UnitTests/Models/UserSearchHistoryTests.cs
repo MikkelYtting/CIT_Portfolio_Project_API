@@ -45,41 +45,20 @@ public class UserSearchHistoryTests
     }
 
     // Id property has no validation constraints (typically DB-generated)
-    // Positive Test Cases for Id (arbitrary values should pass)
     [DataTestMethod]
-    [DataRow(1)] // typical
-    [DataRow(2)] // sequential
-    [DataRow(3)] // sequential
-    [DataRow(42)] // arbitrary positive
-    [DataRow(1000)] // larger id
-    [DataRow(int.MaxValue)] // extreme positive
-    /// <summary>
-    /// Positive testcases for Id (ingen valideringsattributter på Id, alle værdier accepteres).
-    /// </summary>
-    public void UserSearchHistory_WithIdValues_ShouldPassValidation_Positive(int id)
-    {
-        // Arrange
-        var model = CreateUserSearchHistory(1, "a", DateTime.UtcNow);
-        model.Id = id;
-        // Act
-        var result = TryValidateModel(model, out var validationResults);
-        // Assert
-        Assert.IsTrue(result);
-        Assert.AreEqual(0, validationResults.Count);
-    }
-
-    // "Negative" Test Cases for Id (still pass due to no constraints)
-    [DataTestMethod]
+    [DataRow(1)]
+    [DataRow(2)]
+    [DataRow(3)]
+    [DataRow(42)]
+    [DataRow(1000)]
+    [DataRow(int.MaxValue)]
     [DataRow(0)]
     [DataRow(-1)]
     [DataRow(-2)]
     [DataRow(-3)]
     [DataRow(-10)]
     [DataRow(int.MinValue)]
-    /// <summary>
-    /// "Negative" testcases for Id (demonstrerer at Id stadig er gyldigt uden constraints).
-    /// </summary>
-    public void UserSearchHistory_WithIdValues_ShouldPassValidation_NegativeButUnconstrained(int id)
+    public void UserSearchHistory_Id_ShouldPass(int id)
     {
         // Arrange
         var model = CreateUserSearchHistory(1, "a", DateTime.UtcNow);
@@ -102,7 +81,7 @@ public class UserSearchHistoryTests
     /// <summary>
     /// Positive testcases for UserId (Range: [1, int.MaxValue]).
     /// </summary>
-    public void UserSearchHistory_WithValidUserId_ShouldPassValidation(int userId)
+    public void UserSearchHistory_UserId_ShouldPass(int userId)
     {
         // Arrange
         var model = CreateUserSearchHistory(userId, "a", DateTime.UtcNow);
@@ -124,7 +103,7 @@ public class UserSearchHistoryTests
     /// <summary>
     /// Negative testcases for UserId (værdier under 1 skal fejle validering).
     /// </summary>
-    public void UserSearchHistory_WithInvalidUserId_ShouldFailValidation(int userId)
+    public void UserSearchHistory_UserId_ShouldFail(int userId)
     {
         // Arrange
         var model = CreateUserSearchHistory(userId, "a", DateTime.UtcNow);
@@ -146,7 +125,7 @@ public class UserSearchHistoryTests
     /// <summary>
     /// Positive testcases for Text (påkrævet, maks længde 512 tegn).
     /// </summary>
-    public void UserSearchHistory_WithValidTextLengths_ShouldPassValidation(int len)
+    public void UserSearchHistory_Text_ShouldPass(int len)
     {
         // Arrange
         var text = new string('a', len);
@@ -169,7 +148,7 @@ public class UserSearchHistoryTests
     /// <summary>
     /// Negative testcases for Text (null/empty eller længder over 512 skal fejle).
     /// </summary>
-    public void UserSearchHistory_WithInvalidText_ShouldFailValidation(object? textArg)
+    public void UserSearchHistory_Text_ShouldFail(object? textArg)
     {
         // Arrange
         string? text = textArg switch
@@ -190,15 +169,18 @@ public class UserSearchHistoryTests
     // Positive Test Cases for SearchedAt (no validation attributes on this property)
     [DataTestMethod]
     [DataRow("0001-01-01T00:00:00Z")] // earliest
+    [DataRow("1800-01-01T00:00:00Z")] // older historical
     [DataRow("1900-01-01T00:00:00Z")] // historical
     [DataRow("1970-01-01T00:00:00Z")] // epoch
     [DataRow("2000-02-29T00:00:00Z")] // leap day
     [DataRow("2025-11-04T12:00:00Z")] // typical value
+    [DataRow("2100-12-31T23:59:59Z")] // future date valid
+    [DataRow("2999-12-31T23:59:59Z")] // future extreme valid
     [DataRow("3000-01-01T00:00:00Z")] // far future (safe)
     /// <summary>
     /// Positive testcases for SearchedAt (der er ingen valideringsattributter på denne egenskab).
     /// </summary>
-    public void UserSearchHistory_WithSearchedAtValues_ShouldPassValidation(string iso)
+    public void UserSearchHistory_SearchedAt_ShouldPass(string iso)
     {
         // Arrange
         var dt = DateTime.Parse(iso);
@@ -210,27 +192,5 @@ public class UserSearchHistoryTests
         Assert.AreEqual(0, validationResults.Count);
     }
 
-    // "Negative" Test Cases for SearchedAt
-    // Note: There are no validation constraints on SearchedAt, so even extreme values are considered valid.
-    [DataTestMethod]
-    [DataRow("0001-01-01T00:00:00Z")] // lower extreme still valid
-    [DataRow("1800-01-01T00:00:00Z")] // older historical
-    [DataRow("1900-01-01T00:00:00Z")] // historical date valid
-    [DataRow("1970-01-01T00:00:00Z")] // epoch date valid
-    [DataRow("2100-12-31T23:59:59Z")] // future date valid
-    [DataRow("2999-12-31T23:59:59Z")] // future extreme valid
-    /// <summary>
-    /// "Negative" testcases for SearchedAt (viser at selv ekstreme datoer stadig er gyldige uden constraints).
-    /// </summary>
-    public void UserSearchHistory_WithEdgeSearchedAtValues_ShouldStillPassValidation(string iso)
-    {
-        // Arrange
-        var dt = DateTime.Parse(iso);
-        var model = CreateUserSearchHistory(1, "a", dt);
-        // Act
-        var result = TryValidateModel(model, out var validationResults);
-        // Assert
-        Assert.IsTrue(result);
-        Assert.AreEqual(0, validationResults.Count);
-    }
+    
 }

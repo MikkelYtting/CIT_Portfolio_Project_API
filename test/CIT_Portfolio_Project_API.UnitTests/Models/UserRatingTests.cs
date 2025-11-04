@@ -1,5 +1,7 @@
+using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using CIT_Portfolio_Project_API.Models.Entities;
-using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace CIT_Portfolio_Project_API.UnitTests.Models;
@@ -7,29 +9,129 @@ namespace CIT_Portfolio_Project_API.UnitTests.Models;
 [TestClass]
 public class UserRatingTests
 {
-    [DataTestMethod]
-    [DataRow(1, "tt123", 1)] // userId min valid, tconst valid, value lower bound
-    [DataRow(10, "tt999", 10)] // value upper bound
-    [DataRow(2, "tt123", 5)] // typical middle value
-    public void UserRating_Positive(int userId, string tconst, int value)
+    private UserRating CreateUserRating(int userId, string? tconst, int value) => new UserRating
     {
-        var ur = new UserRating { UserId = userId, Tconst = tconst, Value = value };
-        var results = ValidationHelper.Validate(ur);
-        results.Should().BeEmpty();
+        UserId = userId,
+        Tconst = tconst!,
+        Value = value
+    };
+
+    private bool TryValidateModel(object model, out ICollection<ValidationResult> results)
+    {
+        var ctx = new ValidationContext(model);
+        results = new List<ValidationResult>();
+        return Validator.TryValidateObject(model, ctx, results, validateAllProperties: true);
+    }
+
+    // Id: no constraints
+    [DataTestMethod]
+    [DataRow(0)]
+    [DataRow(-1)]
+    [DataRow(1)]
+    [DataRow(42)]
+    [DataRow(int.MaxValue)]
+    public void UserRating_Id_ShouldPass(int id)
+    {
+        // Arrange
+        var model = CreateUserRating(1, "tt123", 5);
+        model.Id = id;
+        // Act
+        var ok = TryValidateModel(model, out var results);
+        // Assert
+        Assert.IsTrue(ok);
+        Assert.AreEqual(0, results.Count);
+    }
+
+    // UserId only
+    [DataTestMethod]
+    [DataRow(1)]
+    [DataRow(2)]
+    [DataRow(int.MaxValue)]
+    public void UserRating_UserId_ShouldPass(int userId)
+    {
+        // Arrange
+        var model = CreateUserRating(userId, "tt123", 5);
+        // Act
+        var ok = TryValidateModel(model, out var results);
+        // Assert
+        Assert.IsTrue(ok);
+        Assert.AreEqual(0, results.Count);
     }
 
     [DataTestMethod]
-    [DataRow(0, "tt123", 1)] // userId below 1
-    [DataRow(-1, "tt123", 10)] // negative userId
-    [DataRow(1, null, 5)] // missing tconst
-    [DataRow(1, "nm123", 5)] // wrong tconst prefix (should be 'tt')
-    [DataRow(1, "tt12", 5)] // tconst too short
-    [DataRow(1, "tt123", 0)] // rating value below min (1)
-    [DataRow(1, "tt123", 11)] // rating value above max (10)
-    public void UserRating_Negative(int userId, string? tconst, int value)
+    [DataRow(0)]
+    [DataRow(-1)]
+    public void UserRating_UserId_ShouldFail(int userId)
     {
-        var ur = new UserRating { UserId = userId, Tconst = tconst!, Value = value };
-        var results = ValidationHelper.Validate(ur);
-        results.Should().NotBeEmpty();
+        // Arrange
+        var model = CreateUserRating(userId, "tt123", 5);
+        // Act
+        var ok = TryValidateModel(model, out var results);
+        // Assert
+        Assert.IsFalse(ok);
+        Assert.IsTrue(results.Count > 0);
+    }
+
+    // Tconst only
+    [DataTestMethod]
+    [DataRow("tt123")]
+    [DataRow("tt000")]
+    [DataRow("tt123456789012345678")] // <=20
+    public void UserRating_Tconst_ShouldPass(string tconst)
+    {
+        // Arrange
+        var model = CreateUserRating(1, tconst, 5);
+        // Act
+        var ok = TryValidateModel(model, out var results);
+        // Assert
+        Assert.IsTrue(ok);
+        Assert.AreEqual(0, results.Count);
+    }
+
+    [DataTestMethod]
+    [DataRow(null)]
+    [DataRow("")]
+    [DataRow("tt12")]
+    [DataRow("nm123")] // wrong prefix
+    [DataRow("tt123456789012345678901")] // >20
+    public void UserRating_Tconst_ShouldFail(string? tconst)
+    {
+        // Arrange
+        var model = CreateUserRating(1, tconst, 5);
+        // Act
+        var ok = TryValidateModel(model, out var results);
+        // Assert
+        Assert.IsFalse(ok);
+        Assert.IsTrue(results.Count > 0);
+    }
+
+    // Value only [1..10]
+    [DataTestMethod]
+    [DataRow(1)]
+    [DataRow(5)]
+    [DataRow(10)]
+    public void UserRating_Value_ShouldPass(int value)
+    {
+        // Arrange
+        var model = CreateUserRating(1, "tt123", value);
+        // Act
+        var ok = TryValidateModel(model, out var results);
+        // Assert
+        Assert.IsTrue(ok);
+        Assert.AreEqual(0, results.Count);
+    }
+
+    [DataTestMethod]
+    [DataRow(0)]
+    [DataRow(11)]
+    public void UserRating_Value_ShouldFail(int value)
+    {
+        // Arrange
+        var model = CreateUserRating(1, "tt123", value);
+        // Act
+        var ok = TryValidateModel(model, out var results);
+        // Assert
+        Assert.IsFalse(ok);
+        Assert.IsTrue(results.Count > 0);
     }
 }

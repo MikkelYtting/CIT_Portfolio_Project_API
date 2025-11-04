@@ -1,5 +1,7 @@
+using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using CIT_Portfolio_Project_API.Models.Entities;
-using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace CIT_Portfolio_Project_API.UnitTests.Models;
@@ -7,25 +9,113 @@ namespace CIT_Portfolio_Project_API.UnitTests.Models;
 [TestClass]
 public class RatingTests
 {
-    [DataTestMethod]
-    [DataRow("tt123", 0.0, 0)] // lower bounds: avg=0, votes=0
-    [DataRow("tt123", 10.0, 100)] // upper avg bound: 10
-    [DataRow("tt999", 5.5, 1)] // typical values
-    public void Rating_Positive(string tconst, double avg, int votes)
+    // Factory
+    private Rating CreateRating(string? tconst, double avg, int votes) => new Rating
     {
-        var r = new Rating { Tconst = tconst, AverageRating = avg, NumVotes = votes };
-        var results = ValidationHelper.Validate(r);
-        results.Should().BeEmpty();
+        Tconst = tconst!,
+        AverageRating = avg,
+        NumVotes = votes
+    };
+
+    private bool TryValidateModel(object model, out ICollection<ValidationResult> results)
+    {
+        var ctx = new ValidationContext(model);
+        results = new List<ValidationResult>();
+        return Validator.TryValidateObject(model, ctx, results, validateAllProperties: true);
+    }
+
+    // Tconst only
+    [DataTestMethod]
+    [DataRow("tt123")]
+    [DataRow("tt000")]
+    [DataRow("tt123456789012345678")] // <= 20
+    public void Rating_Tconst_ShouldPass(string tconst)
+    {
+        // Arrange
+        var model = CreateRating(tconst, avg: 5.0, votes: 1);
+        // Act
+        var ok = TryValidateModel(model, out var results);
+        // Assert
+        Assert.IsTrue(ok);
+        Assert.AreEqual(0, results.Count);
     }
 
     [DataTestMethod]
-    [DataRow(null, -0.1, -1)] // missing tconst, avg<0, votes<0
-    [DataRow("tt12", 10.1, -5)] // tconst too short, avg>10, votes<0
-    [DataRow("nm123", -1.0, 0)] // wrong prefix, avg<0
-    public void Rating_Negative(string? tconst, double avg, int votes)
+    [DataRow(null)]
+    [DataRow("")]
+    [DataRow("tt12")] // too short
+    [DataRow("nm123")] // wrong prefix
+    [DataRow("tt123456789012345678901")] // > 20
+    public void Rating_Tconst_ShouldFail(string? tconst)
     {
-        var r = new Rating { Tconst = tconst!, AverageRating = avg, NumVotes = votes };
-        var results = ValidationHelper.Validate(r);
-        results.Should().NotBeEmpty();
+        // Arrange
+        var model = CreateRating(tconst, avg: 5.0, votes: 1);
+        // Act
+        var ok = TryValidateModel(model, out var results);
+        // Assert
+        Assert.IsFalse(ok);
+        Assert.IsTrue(results.Count > 0);
+    }
+
+    // AverageRating only
+    [DataTestMethod]
+    [DataRow(0.0)]
+    [DataRow(1.0)]
+    [DataRow(5.5)]
+    [DataRow(10.0)]
+    public void Rating_AverageRating_ShouldPass(double avg)
+    {
+        // Arrange
+        var model = CreateRating("tt123", avg, votes: 1);
+        // Act
+        var ok = TryValidateModel(model, out var results);
+        // Assert
+        Assert.IsTrue(ok);
+        Assert.AreEqual(0, results.Count);
+    }
+
+    [DataTestMethod]
+    [DataRow(-0.1)]
+    [DataRow(10.1)]
+    public void Rating_AverageRating_ShouldFail(double avg)
+    {
+        // Arrange
+        var model = CreateRating("tt123", avg, votes: 1);
+        // Act
+        var ok = TryValidateModel(model, out var results);
+        // Assert
+        Assert.IsFalse(ok);
+        Assert.IsTrue(results.Count > 0);
+    }
+
+    // NumVotes only
+    [DataTestMethod]
+    [DataRow(0)]
+    [DataRow(1)]
+    [DataRow(42)]
+    [DataRow(int.MaxValue)]
+    public void Rating_NumVotes_ShouldPass(int votes)
+    {
+        // Arrange
+        var model = CreateRating("tt123", avg: 5.0, votes: votes);
+        // Act
+        var ok = TryValidateModel(model, out var results);
+        // Assert
+        Assert.IsTrue(ok);
+        Assert.AreEqual(0, results.Count);
+    }
+
+    [DataTestMethod]
+    [DataRow(-1)]
+    [DataRow(-5)]
+    public void Rating_NumVotes_ShouldFail(int votes)
+    {
+        // Arrange
+        var model = CreateRating("tt123", avg: 5.0, votes: votes);
+        // Act
+        var ok = TryValidateModel(model, out var results);
+        // Assert
+        Assert.IsFalse(ok);
+        Assert.IsTrue(results.Count > 0);
     }
 }
