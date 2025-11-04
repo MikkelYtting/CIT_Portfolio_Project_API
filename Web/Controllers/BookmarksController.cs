@@ -2,6 +2,7 @@ using CIT_Portfolio_Project_API.Application.Managers.Interfaces;
 using CIT_Portfolio_Project_API.Infrastructure.Security;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel.DataAnnotations;
 
 namespace CIT_Portfolio_Project_API.Web.Controllers;
 
@@ -13,8 +14,16 @@ public class BookmarksController : ControllerBase
     private readonly IBookmarkManager _manager;
     public BookmarksController(IBookmarkManager manager) { _manager = manager; }
 
+    /// <summary>
+    /// Get all bookmarks for a user
+    /// </summary>
+    /// <param name="userId">ID of the user whose bookmarks to retrieve</param>
+    /// <param name="ct">Cancellation token</param>
+    /// <returns>List of bookmarks with movie information</returns>
     [HttpGet]
-    public async Task<IActionResult> Get(int userId, CancellationToken ct)
+    public async Task<IActionResult> Get(
+        [FromRoute] int userId,
+        CancellationToken ct)
     {
         var tokenUserId = User.GetUserId();
         if (tokenUserId is null || tokenUserId <= 0) return Unauthorized();
@@ -22,15 +31,26 @@ public class BookmarksController : ControllerBase
         return Ok(await _manager.GetAsync(tokenUserId.Value, ct));
     }
 
-    public record AddBookmarkRequest(string Tconst, string? Note);
 
+    /// <summary>
+    /// Add a movie to user's bookmarks
+    /// </summary>
+    /// <param name="userId">ID of the user to add bookmark for</param>
+    /// <param name="tconst">IMDB ID of the movie to bookmark (starts with 'tt')</param>
+    /// <param name="note">Optional note about the bookmark</param>
+    /// <param name="ct">Cancellation token</param>
+    /// <returns>No content on success</returns>
     [HttpPost]
-    public async Task<IActionResult> Add(int userId, [FromBody] AddBookmarkRequest request, CancellationToken ct)
+    public async Task<IActionResult> Add(
+        [FromRoute] int userId,
+        [FromQuery][Required][RegularExpression(@"^tt\d+$", ErrorMessage = "Movie ID must start with 'tt' followed by numbers")] string tconst,
+        [FromQuery] string? note,
+        CancellationToken ct)
     {
         var tokenUserId = User.GetUserId();
         if (tokenUserId is null || tokenUserId <= 0) return Unauthorized();
         if (tokenUserId.Value != userId) return Forbid();
-        await _manager.AddAsync(tokenUserId.Value, request.Tconst, request.Note, ct);
+        await _manager.AddAsync(tokenUserId.Value, tconst, note, ct);
         return NoContent();
     }
 
