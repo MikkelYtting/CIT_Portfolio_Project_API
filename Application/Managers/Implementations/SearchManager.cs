@@ -9,6 +9,10 @@ public class SearchManager : ISearchManager
     private readonly ISearchRepository _repo;
     public SearchManager(ISearchRepository repo) { _repo = repo; }
 
+    /// <summary>
+    /// Tekst-søgning. Vi bygger pagination-links (self/prev/next) så klienten kan bladre.
+    /// Bemærk: her er fokus på præsentation, ikke på selve søge-algoritmen.
+    /// </summary>
     public async Task<PageDto<SearchDto>> StringSearchAsync(int userId, string text, int page, int pageSize, CancellationToken ct = default)
     {
         var rows = (await _repo.StringSearchAsync(userId, text, ct)).ToList();
@@ -21,6 +25,9 @@ public class SearchManager : ISearchManager
         return dto;
     }
 
+    /// <summary>
+    /// Struktureret søgning. Samme pagination-links som ovenfor, men med flere parametre.
+    /// </summary>
     public async Task<PageDto<SearchDto>> StructuredSearchAsync(int userId, string? title, string? plot, string? characters, string? person, int page, int pageSize, CancellationToken ct = default)
     {
         var rows = (await _repo.StructuredSearchAsync(userId, title, plot, characters, person, ct)).ToList();
@@ -34,6 +41,9 @@ public class SearchManager : ISearchManager
         return dto;
     }
 
+    /// <summary>
+    /// Tilføjer self/prev/next links til siden. Simpel men vigtig UX-detalje.
+    /// </summary>
     private static void AddPageLinks<T>(PageDto<T> dto, string basePath)
     {
         dto.Links.Add(new LinkDto("self", $"{basePath}&page={dto.Page}&pageSize={dto.PageSize}"));

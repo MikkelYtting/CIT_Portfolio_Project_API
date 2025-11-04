@@ -1,4 +1,5 @@
 using CIT_Portfolio_Project_API.Application.Managers.Interfaces;
+using CIT_Portfolio_Project_API.Infrastructure.Security;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -14,22 +15,32 @@ public class BookmarksController : ControllerBase
 
     [HttpGet]
     public async Task<IActionResult> Get(int userId, CancellationToken ct)
-    => Ok(await _manager.GetAsync(userId, ct));
+    {
+        var tokenUserId = User.GetUserId();
+        if (tokenUserId is null || tokenUserId <= 0) return Unauthorized();
+        if (tokenUserId.Value != userId) return Forbid();
+        return Ok(await _manager.GetAsync(tokenUserId.Value, ct));
+    }
 
     public record AddBookmarkRequest(string Tconst, string? Note);
 
     [HttpPost]
     public async Task<IActionResult> Add(int userId, [FromBody] AddBookmarkRequest request, CancellationToken ct)
     {
-        // TODO: Enforce userId from JWT instead of route for security
-    await _manager.AddAsync(userId, request.Tconst, request.Note, ct);
+        var tokenUserId = User.GetUserId();
+        if (tokenUserId is null || tokenUserId <= 0) return Unauthorized();
+        if (tokenUserId.Value != userId) return Forbid();
+        await _manager.AddAsync(tokenUserId.Value, request.Tconst, request.Note, ct);
         return NoContent();
     }
 
     [HttpDelete("{tconst}")]
     public async Task<IActionResult> Delete(int userId, string tconst, CancellationToken ct)
     {
-    await _manager.DeleteAsync(userId, tconst, ct);
+        var tokenUserId = User.GetUserId();
+        if (tokenUserId is null || tokenUserId <= 0) return Unauthorized();
+        if (tokenUserId.Value != userId) return Forbid();
+        await _manager.DeleteAsync(tokenUserId.Value, tconst, ct);
         return NoContent();
     }
 }

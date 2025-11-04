@@ -15,6 +15,10 @@ public class UserManager : IUserManager
     public UserManager(IUserRepository repo, PasswordHasher hasher, IMapper mapper)
     { _repo = repo; _hasher = hasher; _mapper = mapper; }
 
+    /// <summary>
+    /// Opretter ny bruger: tjekker om brugernavn findes, hasher kodeordet og gemmer.
+    /// Simpelt sikkerheds-krav: vi gemmer aldrig plain text adgangkode.
+    /// </summary>
     public async Task<UserDto> RegisterAsync(string username, string email, string password, CancellationToken ct = default)
     {
         var existing = await _repo.GetByUsernameAsync(username, ct);

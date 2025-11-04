@@ -1,5 +1,6 @@
 using CIT_Portfolio_Project_API.Application.DTOs;
 using CIT_Portfolio_Project_API.Application.Managers.Interfaces;
+using CIT_Portfolio_Project_API.Infrastructure.Security;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -16,15 +17,9 @@ public class RatingsController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Rate([FromBody] RatingDto dto, CancellationToken ct)
     {
-        // TODO: Extract userId from JWT claims
-        if (!int.TryParse(User.Identity?.Name, out var userId))
-        {
-            // Fallback for now; in real code extract claim type "sub"
-            var sub = User.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
-            userId = int.TryParse(sub, out var id) ? id : 0;
-        }
-        if (userId <= 0) return Unauthorized();
-    await _ratingManager.RateAsync(userId, dto.Tconst, dto.Value, ct);
+        var userId = User.GetUserId();
+        if (userId is null || userId <= 0) return Unauthorized();
+        await _ratingManager.RateAsync(userId.Value, dto.Tconst, dto.Value, ct);
         return NoContent();
     }
 }

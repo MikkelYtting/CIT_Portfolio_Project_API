@@ -4,8 +4,6 @@
     <IsPackable>false</IsPackable>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <!-- Place test build outputs outside the SUT project directory to avoid recursive content copy issues (MvcTestingAppManifest.json) -->
-    <BaseOutputPath>$(MSBuildThisFileDirectory)..\..\artifacts\tests\</BaseOutputPath>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="9.0.10" />

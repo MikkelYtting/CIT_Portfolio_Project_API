@@ -13,6 +13,10 @@ public class AuthManager : IAuthManager
     public AuthManager(IUserRepository users, PasswordHasher hasher, JwtTokenService jwt)
     { _users = users; _hasher = hasher; _jwt = jwt; }
 
+    /// <summary>
+    /// Logger brugeren ind: tjekker brugernavn + kodeord og returnerer JWT hvis ok.
+    /// Returnerer null ved forkert login (ingen detaljer lækkes).
+    /// </summary>
     public async Task<LoginResponse?> LoginAsync(LoginRequest request, CancellationToken ct = default)
     {
         var user = await _users.GetByUsernameAsync(request.Username, ct);

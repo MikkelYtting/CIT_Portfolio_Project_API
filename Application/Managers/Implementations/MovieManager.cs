@@ -11,6 +11,9 @@ public class MovieManager : IMovieManager
     private readonly IMapper _mapper;
     public MovieManager(IMovieRepository repo, IMapper mapper) { _repo = repo; _mapper = mapper; }
 
+    /// <summary>
+    /// Henter film og tilføjer HATEOAS-links + pagination links (self/prev/next).
+    /// </summary>
     public async Task<PageDto<MovieDto>> GetMoviesAsync(int page, int pageSize, CancellationToken ct = default)
     {
         var pageDto = await _repo.GetMoviesAsync(page, pageSize, ct);
@@ -31,6 +34,10 @@ public class MovieManager : IMovieManager
         return dto;
     }
 
+    /// <summary>
+    /// Simpel søgning efter titel. Bemærk at base-URL allerede har '?',
+    /// så vi skifter separator til '&' i pagination (lille men vigtig detalje).
+    /// </summary>
     public async Task<PageDto<MovieDto>> SearchAsync(string query, int page, int pageSize, CancellationToken ct = default)
     {
         var pageDto = await _repo.SearchAsync(query, page, pageSize, ct);
@@ -50,6 +57,9 @@ public class MovieManager : IMovieManager
         return pageDto;
     }
 
+    /// <summary>
+    /// Bygger pagination-links. Bruger '?' eller '&' alt efter om basePath har query i forvejen.
+    /// </summary>
     private static void AddPageLinks<T>(PageDto<T> dto, string basePath)
     {
         var sep = basePath.Contains('?') ? '&' : '?';
