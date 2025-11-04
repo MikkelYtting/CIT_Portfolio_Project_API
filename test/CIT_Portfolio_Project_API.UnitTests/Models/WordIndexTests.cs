@@ -1,5 +1,7 @@
+using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using CIT_Portfolio_Project_API.Models.Entities;
-using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace CIT_Portfolio_Project_API.UnitTests.Models;
@@ -7,31 +9,88 @@ namespace CIT_Portfolio_Project_API.UnitTests.Models;
 [TestClass]
 public class WordIndexTests
 {
-    [DataTestMethod]
-    [DataRow("word", 0)] // lower bound frequency 0 with typical word
-    [DataRow(128, 100)] // word length at max (128)
-    public void WordIndex_Positive(object arg1, int freq)
+    private WordIndex CreateWordIndex(string? word, int frequency) => new WordIndex
     {
-        string w = arg1 is int len ? new string('a', len) : arg1.ToString()!;
-        var wi = new WordIndex { Word = w, Frequency = freq };
-        var results = ValidationHelper.Validate(wi);
-        results.Should().BeEmpty();
+        Word = word!,
+        Frequency = frequency
+    };
+
+    private bool TryValidateModel(object model, out ICollection<ValidationResult> results)
+    {
+        var ctx = new ValidationContext(model);
+        results = new List<ValidationResult>();
+        return Validator.TryValidateObject(model, ctx, results, validateAllProperties: true);
+    }
+
+    // Word only (required, <=128)
+    [DataTestMethod]
+    [DataRow("a")] // min length 1
+    [DataRow("word")] 
+    [DataRow(128)] // boundary
+    public void WordIndex_Word_ShouldPass(object arg)
+    {
+        // Arrange
+        var word = arg is int len ? new string('a', len) : arg.ToString()!;
+        var model = CreateWordIndex(word, frequency: 0);
+        // Act
+        var ok = TryValidateModel(model, out var results);
+        // Assert
+        Assert.IsTrue(ok);
+        Assert.AreEqual(0, results.Count);
     }
 
     [DataTestMethod]
-    [DataRow(null, 0)] // missing word
-    [DataRow(129, 0)] // word length above max (128)
-    [DataRow("a", -1)] // negative frequency
-    public void WordIndex_Negative(object? arg1, int freq)
+    [DataRow(null)]
+    [DataRow("")]
+    [DataRow(129)] // too long
+    public void WordIndex_Word_ShouldFail(object? arg)
     {
-        string? w = arg1 switch
+        // Arrange
+        string? word = arg switch
         {
             null => null,
+            string s => s,
             int len => new string('a', len),
-            _ => arg1.ToString()
+            _ => arg!.ToString()
         };
-        var wi = new WordIndex { Word = w!, Frequency = freq };
-        var results = ValidationHelper.Validate(wi);
-        results.Should().NotBeEmpty();
+        var model = CreateWordIndex(word, frequency: 0);
+        // Act
+        var ok = TryValidateModel(model, out var results);
+        // Assert
+        Assert.IsFalse(ok);
+        Assert.IsTrue(results.Count > 0);
+    }
+
+    // Frequency only (>=0)
+    [DataTestMethod]
+    [DataRow(0)]
+    [DataRow(1)]
+    [DataRow(100)]
+    [DataRow(int.MaxValue - 2)]
+    [DataRow(int.MaxValue - 1)]
+    [DataRow(int.MaxValue)]
+    public void WordIndex_Frequency_ShouldPass(int freq)
+    {
+        // Arrange
+        var model = CreateWordIndex("word", freq);
+        // Act
+        var ok = TryValidateModel(model, out var results);
+        // Assert
+        Assert.IsTrue(ok);
+        Assert.AreEqual(0, results.Count);
+    }
+
+    [DataTestMethod]
+    [DataRow(-1)]
+    [DataRow(-100)]
+    public void WordIndex_Frequency_ShouldFail(int freq)
+    {
+        // Arrange
+        var model = CreateWordIndex("word", freq);
+        // Act
+        var ok = TryValidateModel(model, out var results);
+        // Assert
+        Assert.IsFalse(ok);
+        Assert.IsTrue(results.Count > 0);
     }
 }

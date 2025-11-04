@@ -1,5 +1,7 @@
+using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using CIT_Portfolio_Project_API.Models.Entities;
-using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace CIT_Portfolio_Project_API.UnitTests.Models;
@@ -7,48 +9,79 @@ namespace CIT_Portfolio_Project_API.UnitTests.Models;
 [TestClass]
 public class PersonTests
 {
-    [DataTestMethod]
-    [DataRow("nm123")] // min regex: 'nm' + 3 digits
-    [DataRow("nm123456")] // within length <= 20
-    public void Nconst_Positive(string nconst)
+    private Person CreatePerson(string? nconst, string? name) => new Person
     {
-        var p = new Person { Nconst = nconst, Name = "Christian Bale" };
-        var results = ValidationHelper.Validate(p);
-        results.Should().BeEmpty();
+        Nconst = nconst!,
+        Name = name
+    };
+
+    private bool TryValidateModel(object model, out ICollection<ValidationResult> results)
+    {
+        var ctx = new ValidationContext(model);
+        results = new List<ValidationResult>();
+        return Validator.TryValidateObject(model, ctx, results, validateAllProperties: true);
+    }
+
+    // Nconst: required, regex nm\d{3,}, length <= 20
+    [DataTestMethod]
+    [DataRow("nm123")]
+    [DataRow("nm123456789012345678")]
+    public void Person_Nconst_ShouldPass(string nconst)
+    {
+        // Arrange
+        var model = CreatePerson(nconst, "Christian Bale");
+        // Act
+        var ok = TryValidateModel(model, out var results);
+        // Assert
+        Assert.IsTrue(ok);
+        Assert.AreEqual(0, results.Count);
     }
 
     [DataTestMethod]
-    [DataRow(null)] // required violation
-    [DataRow("")] // empty not allowed
-    [DataRow("tt123")] // wrong prefix (should be 'nm')
-    [DataRow("nm12")]  // too short < 3 digits
-    [DataRow("nm12345678901234567890")] // length > 20
-    public void Nconst_Negative(string? nconst)
+    [DataRow(null)]
+    [DataRow("")]
+    [DataRow("tt123")] // wrong prefix
+    [DataRow("nm12")]  // too short
+    [DataRow("nm12345678901234567890")] // > 20
+    public void Person_Nconst_ShouldFail(string? nconst)
     {
-        var p = new Person { Nconst = nconst!, Name = "x" };
-        var results = ValidationHelper.Validate(p);
-        results.Should().NotBeEmpty();
+        // Arrange
+        var model = CreatePerson(nconst, "x");
+        // Act
+        var ok = TryValidateModel(model, out var results);
+        // Assert
+        Assert.IsFalse(ok);
+        Assert.IsTrue(results.Count > 0);
+    }
+
+    // Name: optional, length <= 256
+    [DataTestMethod]
+    [DataRow("")]
+    [DataRow("A")]
+    [DataRow(null)]
+    public void Person_Name_ShouldPass(string? value)
+    {
+        // Arrange
+        var model = CreatePerson("nm123", value);
+        // Act
+        var ok = TryValidateModel(model, out var results);
+        // Assert
+        Assert.IsTrue(ok);
+        Assert.AreEqual(0, results.Count);
     }
 
     [DataTestMethod]
-    [DataRow("")] // empty allowed
-    [DataRow("A")] // 1 char
-    [DataRow(null)] // optional
-    public void Name_Positive(string? value)
+    [DataRow(257)]
+    [DataRow(300)]
+    public void Person_Name_ShouldFail(int length)
     {
-        var p = new Person { Nconst = "nm123", Name = value };
-        var results = ValidationHelper.Validate(p);
-        results.Should().BeEmpty();
-    }
-
-    [DataTestMethod]
-    [DataRow(257)] // just above max 256
-    [DataRow(300)] // further above max
-    public void Name_Negative_Too_Long(int length)
-    {
+        // Arrange
         var name = new string('a', length);
-        var p = new Person { Nconst = "nm123", Name = name };
-        var results = ValidationHelper.Validate(p);
-        results.Should().NotBeEmpty();
+        var model = CreatePerson("nm123", name);
+        // Act
+        var ok = TryValidateModel(model, out var results);
+        // Assert
+        Assert.IsFalse(ok);
+        Assert.IsTrue(results.Count > 0);
     }
 }
