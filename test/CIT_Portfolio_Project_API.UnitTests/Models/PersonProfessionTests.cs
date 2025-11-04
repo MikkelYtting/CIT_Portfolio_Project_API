@@ -8,8 +8,8 @@ namespace CIT_Portfolio_Project_API.UnitTests.Models;
 public class PersonProfessionTests
 {
     [DataTestMethod]
-    [DataRow("nm123", "actor")]
-    [DataRow("nm999", typeof(string), 64)]
+    [DataRow("nm123", "actor")] // typical profession value
+    [DataRow("nm999", typeof(string), 64)] // profession at max length (64)
     public void PersonProfession_Positive(string nconst, object profession, int len = -1)
     {
         string prof = profession is Type ? new string('a', len) : profession.ToString()!;
@@ -19,10 +19,10 @@ public class PersonProfessionTests
     }
 
     [DataTestMethod]
-    [DataRow(null, "actor")]
-    [DataRow("nm12", "actor")]
-    [DataRow("nm123", null)]
-    [DataRow("nm123", typeof(string), 65)]
+    [DataRow(null, "actor")] // missing nconst
+    [DataRow("nm12", "actor")] // nconst too short (< 3 digits)
+    [DataRow("nm123", null)] // missing profession
+    [DataRow("nm123", typeof(string), 65)] // profession length above max (64)
     public void PersonProfession_Negative(string? nconst, object? profession, int len = -1)
     {
         string? prof = profession as string;

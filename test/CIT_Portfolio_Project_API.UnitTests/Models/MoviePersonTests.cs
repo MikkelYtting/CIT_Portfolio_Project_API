@@ -8,8 +8,8 @@ namespace CIT_Portfolio_Project_API.UnitTests.Models;
 public class MoviePersonTests
 {
     [DataTestMethod]
-    [DataRow("tt123", "nm123", null)]
-    [DataRow("tt999", "nm999", "actor")]
+    [DataRow("tt123", "nm123", null)] // optional category (null) allowed
+    [DataRow("tt999", "nm999", "actor")] // typical category within length
     public void MoviePerson_Positive(string tconst, string nconst, string? category)
     {
         var mp = new MoviePerson { Tconst = tconst, Nconst = nconst, Category = category };
@@ -18,10 +18,10 @@ public class MoviePersonTests
     }
 
     [DataTestMethod]
-    [DataRow(null, "nm123", null)]
-    [DataRow("tt12", "nm123", null)]
-    [DataRow("tt123", null, null)]
-    [DataRow("tt123", "nm12", null)]
+    [DataRow(null, "nm123", null)] // missing tconst
+    [DataRow("tt12", "nm123", null)] // tconst too short (< 3 digits)
+    [DataRow("tt123", null, null)] // missing nconst
+    [DataRow("tt123", "nm12", null)] // nconst too short (< 3 digits)
     public void MoviePerson_Negative(string? tconst, string? nconst, string? category)
     {
         var mp = new MoviePerson { Tconst = tconst!, Nconst = nconst!, Category = category };
@@ -30,7 +30,7 @@ public class MoviePersonTests
     }
 
     [DataTestMethod]
-    [DataRow(65)]
+    [DataRow(65)] // category length above max (64)
     public void MoviePerson_Negative_Category_Too_Long(int len)
     {
         var cat = new string('a', len);
