@@ -1,4 +1,6 @@
 using System.Text;
+using System.Security.Claims;
+using System.IdentityModel.Tokens.Jwt;
 using AutoMapper;
 using CIT_Portfolio_Project_API.Infrastructure.Mapping;
 using CIT_Portfolio_Project_API.Infrastructure.Persistence;
@@ -29,21 +31,27 @@ builder.Services.AddSwaggerGen(c =>
 {
 	// Enable JWT Authorize button in Swagger UI
 	c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo { Title = "CIT Portfolio API", Version = "v1" });
-	var securityScheme = new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+
+	// Define the bearer auth scheme with a proper reference so Swashbuckle applies it to operations
+	var jwtScheme = new Microsoft.OpenApi.Models.OpenApiSecurityScheme
 	{
 		Name = "Authorization",
 		Type = Microsoft.OpenApi.Models.SecuritySchemeType.Http,
 		Scheme = "bearer",
 		BearerFormat = "JWT",
 		In = Microsoft.OpenApi.Models.ParameterLocation.Header,
-		Description = "Enter 'Bearer {token}'"
+		Description = "Indsæt KUN tokenen eller 'Bearer {token}' (UI'en accepterer begge)",
+		Reference = new Microsoft.OpenApi.Models.OpenApiReference
+		{
+			Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
+			Id = "Bearer"
+		}
 	};
-	c.AddSecurityDefinition("Bearer", securityScheme);
-	var securityRequirement = new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
+	c.AddSecurityDefinition("Bearer", jwtScheme);
+	c.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
 	{
-		[securityScheme] = Array.Empty<string>()
-	};
-	c.AddSecurityRequirement(securityRequirement);
+		{ jwtScheme, Array.Empty<string>() }
+	});
 });
 
 // Load .env (optional). If .env is missing, Env.Load() is a no-op and we'll fall back to configuration.
@@ -207,6 +215,21 @@ app.MapGet("/debug/db-ping", async (AppDbContext dbCtx) =>
 		return Results.Problem($"DB connection failed: {ex.Message}");
 	}
 }).WithTags("Debug");
+
+// Auth debug: return current user's claims (requires valid Authorization header)
+app.MapGet("/debug/whoami", (ClaimsPrincipal user) =>
+{
+	var sub = user.FindFirst(JwtRegisteredClaimNames.Sub)?.Value
+			  ?? user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+	var name = user.FindFirst(JwtRegisteredClaimNames.UniqueName)?.Value
+			   ?? user.Identity?.Name;
+	var claims = user.Claims.Select(c => new { type = c.Type, value = c.Value });
+	return Results.Ok(new { sub, name, claims });
+}).RequireAuthorization().WithTags("Debug");
+
+
+
+
 
 app.Run();
 
