@@ -25,7 +25,26 @@ builder.Services.AddControllers(options =>
 
 builder.Services.AddProblemDetails();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+	// Enable JWT Authorize button in Swagger UI
+	c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo { Title = "CIT Portfolio API", Version = "v1" });
+	var securityScheme = new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+	{
+		Name = "Authorization",
+		Type = Microsoft.OpenApi.Models.SecuritySchemeType.Http,
+		Scheme = "bearer",
+		BearerFormat = "JWT",
+		In = Microsoft.OpenApi.Models.ParameterLocation.Header,
+		Description = "Enter 'Bearer {token}'"
+	};
+	c.AddSecurityDefinition("Bearer", securityScheme);
+	var securityRequirement = new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
+	{
+		[securityScheme] = Array.Empty<string>()
+	};
+	c.AddSecurityRequirement(securityRequirement);
+});
 
 // Load .env (optional). If .env is missing, Env.Load() is a no-op and we'll fall back to configuration.
 Env.Load();
