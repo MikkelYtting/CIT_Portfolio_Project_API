@@ -8,8 +8,8 @@ namespace CIT_Portfolio_Project_API.UnitTests.Models;
 public class PersonTests
 {
     [DataTestMethod]
-    [DataRow("nm123")]
-    [DataRow("nm123456")] 
+    [DataRow("nm123")] // min regex: 'nm' + 3 digits
+    [DataRow("nm123456")] // within length <= 20
     public void Nconst_Positive(string nconst)
     {
         var p = new Person { Nconst = nconst, Name = "Christian Bale" };
@@ -18,11 +18,11 @@ public class PersonTests
     }
 
     [DataTestMethod]
-    [DataRow(null)]
-    [DataRow("")]
-    [DataRow("tt123")] // wrong prefix
-    [DataRow("nm12")]  // too short
-    [DataRow("nm12345678901234567890")] // exceeds StringLength(20)
+    [DataRow(null)] // required violation
+    [DataRow("")] // empty not allowed
+    [DataRow("tt123")] // wrong prefix (should be 'nm')
+    [DataRow("nm12")]  // too short < 3 digits
+    [DataRow("nm12345678901234567890")] // length > 20
     public void Nconst_Negative(string? nconst)
     {
         var p = new Person { Nconst = nconst!, Name = "x" };
@@ -31,9 +31,9 @@ public class PersonTests
     }
 
     [DataTestMethod]
-    [DataRow("")]
-    [DataRow("A")] 
-    [DataRow(null)]
+    [DataRow("")] // empty allowed
+    [DataRow("A")] // 1 char
+    [DataRow(null)] // optional
     public void Name_Positive(string? value)
     {
         var p = new Person { Nconst = "nm123", Name = value };
@@ -42,8 +42,8 @@ public class PersonTests
     }
 
     [DataTestMethod]
-    [DataRow(257)]
-    [DataRow(300)]
+    [DataRow(257)] // just above max 256
+    [DataRow(300)] // further above max
     public void Name_Negative_Too_Long(int length)
     {
         var name = new string('a', length);

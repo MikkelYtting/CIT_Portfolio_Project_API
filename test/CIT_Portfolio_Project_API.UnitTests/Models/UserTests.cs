@@ -8,9 +8,9 @@ namespace CIT_Portfolio_Project_API.UnitTests.Models;
 public class UserTests
 {
     [DataTestMethod]
-    [DataRow("bob", "bob@example.com", 20)] // min pass hash length
-    [DataRow("a_very_long_username_but_valid", "a@b.co", 50)]
-    [DataRow(64, "ok@example.com", 200)] // max username via length, max passwordhash
+    [DataRow("bob", "bob@example.com", 20)] // username >=3, email valid, min pass hash length
+    [DataRow("a_very_long_username_but_valid", "a@b.co", 50)] // typical valid values
+    [DataRow(64, "ok@example.com", 200)] // username at max 64 chars, pass hash at max 200
     public void User_Positive(object usernameArg, string email, int passLen)
     {
         var uname = usernameArg is int len ? new string('a', len) : usernameArg.ToString()!;
@@ -26,9 +26,9 @@ public class UserTests
 
     [DataTestMethod]
     [DataRow("ab", "bad-email", 19)] // username too short, bad email, pass too short
-    [DataRow("", "", 10)] // empty values
-    [DataRow(65, "toolong@example.com", 10)] // username too long
-    [DataRow("valid", "invalid@", 200)] // invalid email
+    [DataRow("", "", 10)] // empty username/email invalid
+    [DataRow(65, "toolong@example.com", 10)] // username longer than 64
+    [DataRow("valid", "invalid@", 200)] // invalid email format
     public void User_Negative(object usernameArg, string email, int passLen)
     {
         var uname = usernameArg is int len ? new string('a', len) : usernameArg.ToString()!;
