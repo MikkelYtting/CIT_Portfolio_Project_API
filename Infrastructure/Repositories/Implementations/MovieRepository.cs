@@ -8,6 +8,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CIT_Portfolio_Project_API.Infrastructure.Repositories.Implementations;
 
+/// <summary>
+/// EF Core-backed movie queries and projections.
+/// </summary>
 public class MovieRepository : IMovieRepository
 {
     private readonly AppDbContext _db;
@@ -17,6 +20,7 @@ public class MovieRepository : IMovieRepository
         _db = db; _mapper = mapper;
     }
 
+    /// <summary>Returns a paged list of movies using projection mapping.</summary>
     public async Task<PageDto<MovieDto>> GetMoviesAsync(int page, int pageSize, CancellationToken ct = default)
     {
         var query = _db.Movies.AsQueryable();
@@ -33,9 +37,11 @@ public class MovieRepository : IMovieRepository
         };
     }
 
+    /// <summary>Finds a movie by tconst; null if not found.</summary>
     public async Task<Movie?> GetByIdAsync(string tconst, CancellationToken ct = default)
         => await _db.Movies.FirstOrDefaultAsync(m => m.Tconst == tconst, ct);
 
+    /// <summary>Free-text search via DB function; pagination assembled here.</summary>
     public async Task<PageDto<MovieDto>> SearchAsync(string queryText, int page, int pageSize, CancellationToken ct = default)
     {
         // Use a known valid user id for logging search history in DB functions.
@@ -47,6 +53,7 @@ public class MovieRepository : IMovieRepository
         return new PageDto<MovieDto> { Page = page, PageSize = pageSize, Total = total, Items = items.ToList() };
     }
 
+    /// <summary>Structured search via DB function; pagination assembled here.</summary>
     public async Task<PageDto<MovieDto>> StructuredSearchAsync(string? title, string? plot, string? characters, string? person, int page, int pageSize, CancellationToken ct = default)
     {
         var rows = await _db.CallStructuredStringSearch(1, title, plot, characters, person).ToListAsync(ct);

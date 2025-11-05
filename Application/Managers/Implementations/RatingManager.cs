@@ -10,8 +10,8 @@ public class RatingManager : IRatingManager
     public RatingManager(IRatingRepository repo) { _repo = repo; }
 
     /// <summary>
-    /// Validerer at rating er mellem 1 og 10 (inkl.). Kaster fejl hvis udenfor.
-    /// Simpel forretningsregel så vi ikke rammer DB med ugyldige værdier.
+    /// Validates that rating is between 1 and 10 (inclusive). Throws if out of range.
+    /// Simple business rule to avoid hitting the DB with invalid values.
     /// </summary>
     public async Task RateAsync(int userId, string tconst, int value, CancellationToken ct = default)
     {
@@ -41,6 +41,7 @@ public class RatingManager : IRatingManager
 
     private static void AddPageLinks<T>(PageDto<T> dto, string basePath)
     {
+        // Keep links valid whether basePath already has query parameters or ends with '?'.
         var sep = basePath.Contains('?') ? (basePath.EndsWith('?') ? string.Empty : "&") : "?";
         dto.Links.Add(new LinkDto("self", $"{basePath}{sep}page={dto.Page}&pageSize={dto.PageSize}"));
         if (dto.Page > 1)

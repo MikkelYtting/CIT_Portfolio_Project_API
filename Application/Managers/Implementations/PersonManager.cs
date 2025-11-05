@@ -11,6 +11,9 @@ public class PersonManager : IPersonManager
     private readonly IMapper _mapper;
     public PersonManager(IPersonRepository repo, IMapper mapper) { _repo = repo; _mapper = mapper; }
 
+    /// <summary>
+    /// Returns a paged list of people with HATEOAS links (self/prev/next and per-item self).
+    /// </summary>
     public async Task<PageDto<PersonDto>> GetPeopleAsync(int page, int pageSize, CancellationToken ct = default)
     {
         var pageDto = await _repo.GetPeopleAsync(page, pageSize, ct);
@@ -20,6 +23,9 @@ public class PersonManager : IPersonManager
         return pageDto;
     }
 
+    /// <summary>
+    /// Looks up a person by nconst and adds a self link if found; returns null if missing.
+    /// </summary>
     public async Task<PersonDto?> GetByIdAsync(string nconst, CancellationToken ct = default)
     {
         var entity = await _repo.GetByIdAsync(nconst, ct);
@@ -29,6 +35,9 @@ public class PersonManager : IPersonManager
         return dto;
     }
 
+    /// <summary>
+    /// Adds self/prev/next paging links for consistency across list endpoints.
+    /// </summary>
     private static void AddPageLinks<T>(PageDto<T> dto, string basePath)
     {
         dto.Links.Add(new LinkDto("self", $"{basePath}?page={dto.Page}&pageSize={dto.PageSize}"));

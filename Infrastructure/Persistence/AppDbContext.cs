@@ -42,7 +42,7 @@ public class AppDbContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
-        // TODO: Adjust keys to match actual SQL schema from Part-1
+        // Keys and composite keys mirroring the SQL schema (keeps natural IMDB keys where meaningful).
         modelBuilder.Entity<Movie>().HasKey(x => x.Tconst);
         modelBuilder.Entity<Rating>().HasKey(x => x.Tconst);
         modelBuilder.Entity<MovieDetail>().HasKey(x => x.Tconst);
@@ -58,7 +58,7 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<UserRating>().HasKey(x => x.Id);
         modelBuilder.Entity<UserSearchHistory>().HasKey(x => x.Id);
 
-        // Keyless types for function results
+        // Keyless types for function results (read-only projections from DB functions/views)
         modelBuilder.Entity<SearchRow>().HasNoKey();
         modelBuilder.Entity<StructuredSearchRow>().HasNoKey();
         modelBuilder.Entity<BookmarkRow>().HasNoKey();
@@ -68,10 +68,10 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<ExactMatchRow>().HasNoKey();
         modelBuilder.Entity<BestMatchRow>().HasNoKey();
         modelBuilder.Entity<CoPlayerRow>().HasNoKey();
-    modelBuilder.Entity<UserRatingHistoryRow>().HasNoKey();
-    modelBuilder.Entity<UserSearchHistoryRow>().HasNoKey();
+        modelBuilder.Entity<UserRatingHistoryRow>().HasNoKey();
+        modelBuilder.Entity<UserSearchHistoryRow>().HasNoKey();
 
-        // Map entities to actual table/column names from the provided SQL scripts
+        // Map entities to actual table/column names from the SQL scripts (keeps DB naming, idiomatic C# in entities)
         modelBuilder.Entity<Movie>(entity =>
         {
             entity.ToTable("movies");
@@ -117,13 +117,11 @@ public class AppDbContext : DbContext
             entity.Property(e => e.Username).HasColumnName("username");
             entity.Property(e => e.Email).HasColumnName("email");
             entity.Property(e => e.PasswordHash).HasColumnName("password_hash");
-            // NOTE: The DB schema requires 'email' (NOT NULL). Our entity doesn't include it yet.
-            // Register endpoint will need an Email field and to use either direct insert including email
-            // or the 'create_user' function from D_functions.sql.
+            // DB requires email (NOT NULL). Registration pipeline ensures email is provided before insert.
         });
     }
 
-    // Function-call helpers (examples using FromSqlInterpolated)
+    // Function-call helpers (using FromSqlInterpolated/ExecuteSqlInterpolated for DB functions)
     public IQueryable<SearchRow> CallStringSearch(int userId, string text)
         => SearchRows.FromSqlInterpolated($"select * from string_search({userId}, {text})");
 
@@ -139,7 +137,7 @@ public class AppDbContext : DbContext
     public async Task<int> ExecuteAddBookmarkAsync(int userId, string tconst, string? note, CancellationToken ct = default)
         => await Database.ExecuteSqlInterpolatedAsync($"select add_bookmark({userId}, {tconst}, {note})", ct);
 
-    // Analytics examples (read-only)
+    // Analytics (read-only examples backed by DB functions)
     public IQueryable<PopularActorRow> CallPopularActorsInMovie(string tconst)
         => PopularActorRows.FromSqlInterpolated($"select * from popular_actors_in_movie({tconst})");
 

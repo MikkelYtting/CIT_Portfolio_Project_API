@@ -12,7 +12,7 @@ public class MovieManager : IMovieManager
     public MovieManager(IMovieRepository repo, IMapper mapper) { _repo = repo; _mapper = mapper; }
 
     /// <summary>
-    /// Henter film og tilføjer HATEOAS-links + pagination links (self/prev/next).
+    /// Fetch movies and attach HATEOAS links + pagination links (self/prev/next).
     /// </summary>
     public async Task<PageDto<MovieDto>> GetMoviesAsync(int page, int pageSize, CancellationToken ct = default)
     {
@@ -35,8 +35,8 @@ public class MovieManager : IMovieManager
     }
 
     /// <summary>
-    /// Simpel søgning efter titel. Bemærk at base-URL allerede har '?',
-    /// så vi skifter separator til '&' i pagination (lille men vigtig detalje).
+    /// Simple title search. If the base path already has a '?',
+    /// we switch the pagination link separator to '&' (small but important detail).
     /// </summary>
     public async Task<PageDto<MovieDto>> SearchAsync(string query, int page, int pageSize, CancellationToken ct = default)
     {
@@ -58,7 +58,7 @@ public class MovieManager : IMovieManager
     }
 
     /// <summary>
-    /// Bygger pagination-links. Bruger '?' eller '&' alt efter om basePath har query i forvejen.
+    /// Build pagination links. Uses '?' or '&' depending on whether the basePath already contains a query.
     /// </summary>
     private static void AddPageLinks<T>(PageDto<T> dto, string basePath)
     {

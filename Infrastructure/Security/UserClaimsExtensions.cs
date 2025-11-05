@@ -7,9 +7,8 @@ namespace CIT_Portfolio_Project_API.Infrastructure.Security;
 public static class UserClaimsExtensions
 {
     /// <summary>
-    /// Hent bruger-id fra JWT claims. Foretrækker 'sub' (subject),
-    /// falder tilbage til NameIdentifier. Returnerer null hvis inget gyldigt tal.
-    /// (Bevidst kort og enkel dok. med små stavefejl for læselighed.)
+    /// Extract user id from JWT claims. Prefers 'sub' (subject),
+    /// falls back to NameIdentifier. Returns null if not a valid integer.
     /// </summary>
     public static int? GetUserId(this ClaimsPrincipal user)
     {

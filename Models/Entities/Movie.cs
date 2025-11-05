@@ -7,7 +7,7 @@ public class Movie
     // IMDB key (tconst)
     [Required]
     [StringLength(20)]
-    [RegularExpression("^tt\\d{3,}$", ErrorMessage = "Tconst must look like 'tt123' (IMDB key)")]
+    [RegularExpression("^tt\\d{3,}$", ErrorMessage = "Tconst must look like 'tt12345' (IMDB key)")]
     public string Tconst { get; set; } = default!;
 
     [StringLength(512)]

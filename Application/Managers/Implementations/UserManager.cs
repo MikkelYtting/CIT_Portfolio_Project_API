@@ -16,8 +16,8 @@ public class UserManager : IUserManager
     { _repo = repo; _hasher = hasher; _mapper = mapper; }
 
     /// <summary>
-    /// Opretter ny bruger: tjekker om brugernavn findes, hasher kodeordet og gemmer.
-    /// Simpelt sikkerheds-krav: vi gemmer aldrig plain text adgangkode.
+    /// Registers a new user: checks for duplicate username, hashes the password, and persists.
+    /// Security baseline: never store plaintext passwords.
     /// </summary>
     public async Task<UserDto> RegisterAsync(string username, string email, string password, CancellationToken ct = default)
     {

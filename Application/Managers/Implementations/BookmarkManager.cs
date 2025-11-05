@@ -11,9 +11,16 @@ public class BookmarkManager : IBookmarkManager
     private readonly IMapper _mapper;
     public BookmarkManager(IBookmarkRepository repo, IMapper mapper) { _repo = repo; _mapper = mapper; }
 
+    /// <summary>
+    /// Adds or updates a bookmark for the given user and movie (optional note supported).
+    /// Ownership is enforced by passing the authenticated userId from the controller.
+    /// </summary>
     public Task AddAsync(int userId, string tconst, string? note, CancellationToken ct = default)
         => _repo.AddAsync(userId, tconst, note, ct);
 
+    /// <summary>
+    /// Returns all bookmarks for the user and attaches a self link to the movie resource.
+    /// </summary>
     public async Task<IEnumerable<BookmarkDto>> GetAsync(int userId, CancellationToken ct = default)
     {
         var rows = await _repo.GetAsync(userId, ct);
@@ -26,6 +33,9 @@ public class BookmarkManager : IBookmarkManager
         });
     }
 
+    /// <summary>
+    /// Removes a bookmark for the user; no-op if it doesn't exist.
+    /// </summary>
     public Task DeleteAsync(int userId, string tconst, CancellationToken ct = default)
         => _repo.DeleteAsync(userId, tconst, ct);
 }

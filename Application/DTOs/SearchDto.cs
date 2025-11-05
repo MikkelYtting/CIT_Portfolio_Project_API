@@ -1,5 +1,8 @@
 namespace CIT_Portfolio_Project_API.Application.DTOs;
 
+/// <summary>
+/// Result row for search endpoints (movie reference + links).
+/// </summary>
 public class SearchDto
 {
     public string Tconst { get; set; } = default!;

@@ -12,24 +12,27 @@ namespace CIT_Portfolio_Project_API.Web.Controllers;
 [Authorize]
 public class RatingsController : ControllerBase
 {
+    // Handles authenticated rating operations (rate a movie). Delegates business rules to the rating manager.
     private readonly IRatingManager _ratingManager;
     public RatingsController(IRatingManager ratingManager) { _ratingManager = ratingManager; }
 
     /// <summary>
-    /// Rate en film med din bedømmelse (1-10)
+    /// Rate a movie with a value between 1 and 10 (inclusive).
     /// </summary>
-    /// <param name="tconst">IMDB ID for filmen (starter med 'tt')</param>
-    /// <param name="value">Din bedømmelse (1-10)</param>
-    /// <param name="ct">Cancellation token</param>
-    /// <returns>Ingen data returneres ved succes</returns>
+    /// <param name="tconst">IMDB tconst (starts with 'tt').</param>
+    /// <param name="value">Rating value (1-10).</param>
+    /// <param name="ct">Cancellation token.</param>
+    /// <returns>No content on success.</returns>
     [HttpPost]
     public async Task<IActionResult> Rate(
-        [FromQuery][Required][RegularExpression(@"^tt\d+$", ErrorMessage = "Tconst skal starte med 'tt' efterfulgt af tal")] string tconst,
-        [FromQuery][Required][Range(1, 10, ErrorMessage = "Rating skal være mellem 1 og 10")] int value,
+        [FromQuery][Required][RegularExpression(@"^tt\d+$", ErrorMessage = "Tconst must start with 'tt' followed by digits")] string tconst,
+        [FromQuery][Required][Range(1, 10, ErrorMessage = "Rating must be between 1 and 10")] int value,
         CancellationToken ct)
     {
+        // Require authenticated user and ensure we can resolve their id from the JWT.
         var userId = User.GetUserId();
         if (userId is null || userId <= 0) return Unauthorized();
+        // Business rule (1..10) is validated here and enforced again in the manager.
         await _ratingManager.RateAsync(userId.Value, tconst, value, ct);
         return NoContent();
     }

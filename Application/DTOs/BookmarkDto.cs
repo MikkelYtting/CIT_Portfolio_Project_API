@@ -1,5 +1,8 @@
 namespace CIT_Portfolio_Project_API.Application.DTOs;
 
+/// <summary>
+/// A user's bookmark of a movie (optional note and links included).
+/// </summary>
 public class BookmarkDto
 {
     public string Tconst { get; set; } = default!;

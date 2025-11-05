@@ -11,6 +11,7 @@ namespace CIT_Portfolio_Project_API.Web.Controllers;
 [Authorize]
 public class BookmarksController : ControllerBase
 {
+    // Manages user-scoped bookmark operations; requires JWT and enforces ownership.
     private readonly IBookmarkManager _manager;
     public BookmarksController(IBookmarkManager manager) { _manager = manager; }
 
@@ -25,6 +26,7 @@ public class BookmarksController : ControllerBase
         [FromRoute] int userId,
         CancellationToken ct)
     {
+        // Ensure the caller is authenticated and only accesses their own bookmarks.
         var tokenUserId = User.GetUserId();
         if (tokenUserId is null || tokenUserId <= 0) return Unauthorized();
         if (tokenUserId.Value != userId) return Forbid();
@@ -47,6 +49,7 @@ public class BookmarksController : ControllerBase
         [FromQuery] string? note,
         CancellationToken ct)
     {
+        // Enforce authentication and ownership before creating a bookmark.
         var tokenUserId = User.GetUserId();
         if (tokenUserId is null || tokenUserId <= 0) return Unauthorized();
         if (tokenUserId.Value != userId) return Forbid();
@@ -57,6 +60,7 @@ public class BookmarksController : ControllerBase
     [HttpDelete("{tconst}")]
     public async Task<IActionResult> Delete(int userId, string tconst, CancellationToken ct)
     {
+        // Enforce authentication and ownership before deletion.
         var tokenUserId = User.GetUserId();
         if (tokenUserId is null || tokenUserId <= 0) return Unauthorized();
         if (tokenUserId.Value != userId) return Forbid();
