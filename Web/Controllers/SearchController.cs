@@ -16,16 +16,6 @@ public class SearchController : ControllerBase
     public SearchController(ISearchManager manager) { _manager = manager; }
 
     [HttpGet]
-<<<<<<< HEAD
-    // Free-text search with pagination. userId may be used for user-specific logging/analytics.
-    public async Task<IActionResult> StringSearch([FromQuery] int userId, [FromQuery] string query, [FromQuery] int page = 1, [FromQuery] int pageSize = 20, CancellationToken ct = default)
-    => Ok(await _manager.StringSearchAsync(userId, query, page, pageSize, ct));
-
-    [HttpGet("structured")]
-    // Structured search across optional fields (title/plot/characters/person).
-    public async Task<IActionResult> Structured([FromQuery] int userId, [FromQuery] string? title, [FromQuery] string? plot, [FromQuery] string? characters, [FromQuery] string? person, [FromQuery] int page = 1, [FromQuery] int pageSize = 20, CancellationToken ct = default)
-    => Ok(await _manager.StructuredSearchAsync(userId, title, plot, characters, person, page, pageSize, ct));
-=======
     public async Task<IActionResult> StringSearch([FromQuery, DefaultValue("dark knight")] string query, [FromQuery] int page = 1, [FromQuery] int pageSize = 20, CancellationToken ct = default)
     {
         var userId = User.GetUserId();
@@ -40,5 +30,4 @@ public class SearchController : ControllerBase
         if (userId is null || userId <= 0) return Unauthorized();
         return Ok(await _manager.StructuredSearchAsync(userId.Value, title, plot, characters, person, page, pageSize, ct));
     }
->>>>>>> upstream/main
 }

@@ -42,11 +42,7 @@ public class AppDbContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
-<<<<<<< HEAD
-        // Keys and composite keys mirroring the SQL schema (keeps natural IMDB keys where meaningful).
-=======
         
->>>>>>> upstream/main
         modelBuilder.Entity<Movie>().HasKey(x => x.Tconst);
         modelBuilder.Entity<Rating>().HasKey(x => x.Tconst);
         modelBuilder.Entity<MovieDetail>().HasKey(x => x.Tconst);
@@ -58,7 +54,7 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<WordIndex>().HasKey(x => x.Word);
 
         modelBuilder.Entity<User>().HasKey(x => x.Id);
-        modelBuilder.Entity<UserBookmark>().HasKey(x => x.Id);
+        modelBuilder.Entity<UserBookmark>().HasKey(x => new { x.UserId, x.Tconst });
         modelBuilder.Entity<UserRating>().HasKey(x => x.Id);
         modelBuilder.Entity<UserSearchHistory>().HasKey(x => x.Id);
 
@@ -123,6 +119,15 @@ public class AppDbContext : DbContext
             entity.Property(e => e.PasswordHash).HasColumnName("password_hash");
             // DB requires email (NOT NULL). Registration pipeline ensures email is provided before insert.
         });
+
+        modelBuilder.Entity<UserBookmark>(entity =>
+        {
+            entity.ToTable("user_bookmarks");
+            entity.Ignore(e => e.Id);  // Table uses composite key (user_id, tconst), not auto-increment id
+            entity.Property(e => e.UserId).HasColumnName("user_id");
+            entity.Property(e => e.Tconst).HasColumnName("tconst");
+            entity.Property(e => e.Note).HasColumnName("note");
+        });
     }
 
     // Function-call helpers (using FromSqlInterpolated/ExecuteSqlInterpolated for DB functions)
@@ -141,14 +146,7 @@ public class AppDbContext : DbContext
     public async Task<int> ExecuteAddBookmarkAsync(int userId, string tconst, string? note, CancellationToken ct = default)
         => await Database.ExecuteSqlInterpolatedAsync($"select add_bookmark({userId}, {tconst}, {note})", ct);
 
-<<<<<<< HEAD
-    // Analytics (read-only examples backed by DB functions)
-=======
-    public async Task<int> ExecuteDeleteBookmarkAsync(int userId, string tconst, CancellationToken ct = default)
-        => await Database.ExecuteSqlInterpolatedAsync($"select delete_bookmark({userId}, {tconst})", ct);
-
     // Analytics examples (read-only)
->>>>>>> upstream/main
     public IQueryable<PopularActorRow> CallPopularActorsInMovie(string tconst)
         => PopularActorRows.FromSqlInterpolated($"select * from popular_actors_in_movie({tconst})");
 

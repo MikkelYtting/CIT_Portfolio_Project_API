@@ -35,34 +35,7 @@ public class MovieManager : IMovieManager
     }
 
     /// <summary>
-<<<<<<< HEAD
-    /// Simple title search. If the base path already has a '?',
-    /// we switch the pagination link separator to '&' (small but important detail).
-    /// </summary>
-    public async Task<PageDto<MovieDto>> SearchAsync(string query, int page, int pageSize, CancellationToken ct = default)
-    {
-        var pageDto = await _repo.SearchAsync(query, page, pageSize, ct);
-        AddPageLinks(pageDto, $"/api/movies/search?query={Uri.EscapeDataString(query)}");
-        foreach (var m in pageDto.Items)
-            m.Links.Add(new LinkDto("self", $"/api/movies/{m.Tconst}"));
-        return pageDto;
-    }
-
-    public async Task<PageDto<MovieDto>> StructuredSearchAsync(string? title, string? plot, string? characters, string? person, int page, int pageSize, CancellationToken ct = default)
-    {
-        var pageDto = await _repo.StructuredSearchAsync(title, plot, characters, person, page, pageSize, ct);
-        var q = $"/api/movies/structured?title={Uri.EscapeDataString(title ?? string.Empty)}&plot={Uri.EscapeDataString(plot ?? string.Empty)}&characters={Uri.EscapeDataString(characters ?? string.Empty)}&person={Uri.EscapeDataString(person ?? string.Empty)}";
-        AddPageLinks(pageDto, q);
-        foreach (var m in pageDto.Items)
-            m.Links.Add(new LinkDto("self", $"/api/movies/{m.Tconst}"));
-        return pageDto;
-    }
-
-    /// <summary>
-    /// Build pagination links. Uses '?' or '&' depending on whether the basePath already contains a query.
-=======
     /// Bygger pagination-links. Bruger '?' eller '&' alt efter om basePath har query i forvejen.
->>>>>>> upstream/main
     /// </summary>
     private static void AddPageLinks<T>(PageDto<T> dto, string basePath)
     {

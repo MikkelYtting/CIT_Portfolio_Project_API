@@ -29,16 +29,6 @@ public class MoviesController : ControllerBase
     }
 
     [HttpGet("search")]
-<<<<<<< HEAD
-    // Free-text search with pagination.
-    public async Task<IActionResult> Search([FromQuery] string query, [FromQuery] int page = 1, [FromQuery] int pageSize = 20, CancellationToken ct = default)
-    => Ok(await _manager.SearchAsync(query, page, pageSize, ct));
-
-    [HttpGet("structured")]
-    // Structured search across optional fields (title/plot/characters/person).
-    public async Task<IActionResult> Structured([FromQuery] string? title, [FromQuery] string? plot, [FromQuery] string? characters, [FromQuery] string? person, [FromQuery] int page = 1, [FromQuery] int pageSize = 20, CancellationToken ct = default)
-    => Ok(await _manager.StructuredSearchAsync(title, plot, characters, person, page, pageSize, ct));
-=======
     [Authorize]
     public async Task<IActionResult> Search([FromQuery, DefaultValue("dark knight")] string query, [FromQuery] int page = 1, [FromQuery] int pageSize = 20, CancellationToken ct = default)
     {
@@ -55,5 +45,4 @@ public class MoviesController : ControllerBase
         if (userId is null || userId <= 0) return Unauthorized();
         return Ok(await _searchManager.StructuredSearchAsync(userId.Value, title, plot, characters, person, page, pageSize, ct));
     }
->>>>>>> upstream/main
 }

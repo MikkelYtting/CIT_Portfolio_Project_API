@@ -28,6 +28,12 @@ public class BookmarkRepository : IBookmarkRepository
     /// <summary>Removes a bookmark for a user (no-op if not present).</summary>
     public async Task DeleteAsync(int userId, string tconst, CancellationToken ct = default)
     {
-        await _db.ExecuteDeleteBookmarkAsync(userId, tconst, ct);
+        var bookmark = await _db.UserBookmarks
+            .FirstOrDefaultAsync(b => b.UserId == userId && b.Tconst == tconst, ct);
+        if (bookmark != null)
+        {
+            _db.UserBookmarks.Remove(bookmark);
+            await _db.SaveChangesAsync(ct);
+        }
     }
 }

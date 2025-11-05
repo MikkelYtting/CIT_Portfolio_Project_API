@@ -22,13 +22,7 @@ public class BookmarksController : ControllerBase
     /// <param name="ct">Cancellation token</param>
     /// <returns>List of bookmarks with movie information</returns>
     [HttpGet]
-<<<<<<< HEAD
-    public async Task<IActionResult> Get(
-        [FromRoute] int userId,
-        CancellationToken ct)
-=======
     public async Task<IActionResult> Get(int userId, [FromQuery] int page = 1, [FromQuery] int pageSize = 20, CancellationToken ct = default)
->>>>>>> upstream/main
     {
         // Ensure the caller is authenticated and only accesses their own bookmarks.
         var tokenUserId = User.GetUserId();
@@ -71,4 +65,9 @@ public class BookmarksController : ControllerBase
         await _manager.DeleteAsync(tokenUserId.Value, tconst, ct);
         return NoContent();
     }
+
+    /// <summary>
+    /// Request model for adding a bookmark (used by Swagger).
+    /// </summary>
+    public record AddBookmarkRequest(string Tconst, string? Note);
 }
