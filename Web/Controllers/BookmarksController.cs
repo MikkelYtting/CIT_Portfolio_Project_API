@@ -22,15 +22,19 @@ public class BookmarksController : ControllerBase
     /// <param name="ct">Cancellation token</param>
     /// <returns>List of bookmarks with movie information</returns>
     [HttpGet]
+<<<<<<< HEAD
     public async Task<IActionResult> Get(
         [FromRoute] int userId,
         CancellationToken ct)
+=======
+    public async Task<IActionResult> Get(int userId, [FromQuery] int page = 1, [FromQuery] int pageSize = 20, CancellationToken ct = default)
+>>>>>>> upstream/main
     {
         // Ensure the caller is authenticated and only accesses their own bookmarks.
         var tokenUserId = User.GetUserId();
         if (tokenUserId is null || tokenUserId <= 0) return Unauthorized();
         if (tokenUserId.Value != userId) return Forbid();
-        return Ok(await _manager.GetAsync(tokenUserId.Value, ct));
+        return Ok(await _manager.GetAsync(tokenUserId.Value, page, pageSize, ct));
     }
 
 

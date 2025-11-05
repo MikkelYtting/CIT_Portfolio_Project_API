@@ -15,6 +15,7 @@ using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using DotNetEnv;
+using CIT_Portfolio_Project_API.Web.Swagger;
 using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -52,6 +53,9 @@ builder.Services.AddSwaggerGen(c =>
 	{
 		{ jwtScheme, Array.Empty<string>() }
 	});
+
+	// Custom request body examples in Swagger UI
+	c.OperationFilter<RequestBodyExamplesOperationFilter>();
 });
 
 // Load .env (optional). If .env is missing, Env.Load() is a no-op and we'll fall back to configuration.
@@ -109,6 +113,8 @@ builder.Services.AddAutoMapper(typeof(ApiMappingProfile).Assembly);
 // FluentValidation
 builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddValidatorsFromAssemblyContaining<ApiMappingProfile>(); // TODO: replace with actual validators when added
+
+// (No external example providers – using custom operation filter above)
 
 // JWT Auth
 var jwtSection = builder.Configuration.GetSection("Jwt");

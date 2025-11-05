@@ -35,6 +35,7 @@ public class MovieManager : IMovieManager
     }
 
     /// <summary>
+<<<<<<< HEAD
     /// Simple title search. If the base path already has a '?',
     /// we switch the pagination link separator to '&' (small but important detail).
     /// </summary>
@@ -59,6 +60,9 @@ public class MovieManager : IMovieManager
 
     /// <summary>
     /// Build pagination links. Uses '?' or '&' depending on whether the basePath already contains a query.
+=======
+    /// Bygger pagination-links. Bruger '?' eller '&' alt efter om basePath har query i forvejen.
+>>>>>>> upstream/main
     /// </summary>
     private static void AddPageLinks<T>(PageDto<T> dto, string basePath)
     {

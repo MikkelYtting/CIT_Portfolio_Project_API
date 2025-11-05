@@ -42,7 +42,11 @@ public class AppDbContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
+<<<<<<< HEAD
         // Keys and composite keys mirroring the SQL schema (keeps natural IMDB keys where meaningful).
+=======
+        
+>>>>>>> upstream/main
         modelBuilder.Entity<Movie>().HasKey(x => x.Tconst);
         modelBuilder.Entity<Rating>().HasKey(x => x.Tconst);
         modelBuilder.Entity<MovieDetail>().HasKey(x => x.Tconst);
@@ -137,7 +141,14 @@ public class AppDbContext : DbContext
     public async Task<int> ExecuteAddBookmarkAsync(int userId, string tconst, string? note, CancellationToken ct = default)
         => await Database.ExecuteSqlInterpolatedAsync($"select add_bookmark({userId}, {tconst}, {note})", ct);
 
+<<<<<<< HEAD
     // Analytics (read-only examples backed by DB functions)
+=======
+    public async Task<int> ExecuteDeleteBookmarkAsync(int userId, string tconst, CancellationToken ct = default)
+        => await Database.ExecuteSqlInterpolatedAsync($"select delete_bookmark({userId}, {tconst})", ct);
+
+    // Analytics examples (read-only)
+>>>>>>> upstream/main
     public IQueryable<PopularActorRow> CallPopularActorsInMovie(string tconst)
         => PopularActorRows.FromSqlInterpolated($"select * from popular_actors_in_movie({tconst})");
 
@@ -162,4 +173,8 @@ public class AppDbContext : DbContext
 
     public IQueryable<UserSearchHistoryRow> CallUserSearchHistory(int userId)
         => UserSearchHistoryRows.FromSqlInterpolated($"select * from get_user_search_history({userId})");
+
+    // Framework user creation (delegates to DB function from Part 1)
+    public async Task<int> ExecuteCreateUserAsync(string username, string email, string passwordHash, CancellationToken ct = default)
+        => await Database.ExecuteSqlInterpolatedAsync($"select create_user({username}, {email}, {passwordHash})", ct);
 }

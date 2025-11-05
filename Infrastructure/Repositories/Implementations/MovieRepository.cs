@@ -40,6 +40,7 @@ public class MovieRepository : IMovieRepository
     /// <summary>Finds a movie by tconst; null if not found.</summary>
     public async Task<Movie?> GetByIdAsync(string tconst, CancellationToken ct = default)
         => await _db.Movies.FirstOrDefaultAsync(m => m.Tconst == tconst, ct);
+<<<<<<< HEAD
 
     /// <summary>Free-text search via DB function; pagination assembled here.</summary>
     public async Task<PageDto<MovieDto>> SearchAsync(string queryText, int page, int pageSize, CancellationToken ct = default)
@@ -62,4 +63,6 @@ public class MovieRepository : IMovieRepository
             .Select(r => new MovieDto { Tconst = r.Tconst, Title = r.Title });
         return new PageDto<MovieDto> { Page = page, PageSize = pageSize, Total = total, Items = items.ToList() };
     }
+=======
+>>>>>>> upstream/main
 }

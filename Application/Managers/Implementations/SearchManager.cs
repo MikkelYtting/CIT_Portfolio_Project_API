@@ -53,7 +53,7 @@ public class SearchManager : ISearchManager
             {
                 Text = r.Text,
                 SearchedAt = r.SearchedAt,
-                Links = new List<LinkDto> { new("repeat", $"/api/search?userId={userId}&query={Uri.EscapeDataString(r.Text)}") }
+                Links = new List<LinkDto> { new("repeat", $"/api/search?query={Uri.EscapeDataString(r.Text)}") }
             })
             .ToList();
         var dto = new PageDto<SearchHistoryDto> { Page = page, PageSize = pageSize, Total = total, Items = items };
