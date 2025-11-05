@@ -15,9 +15,11 @@ public class UserRepository : IUserRepository
 
     public async Task<User> AddAsync(User user, CancellationToken ct = default)
     {
-        _db.Users.Add(user);
-        await _db.SaveChangesAsync(ct);
-        return user;
+        // Delegate creation to DB function to enforce Part 1 rules
+        await _db.ExecuteCreateUserAsync(user.Username, user.Email, user.PasswordHash, ct);
+        // Attempt to re-load the created user by username
+        var created = await _db.Users.FirstOrDefaultAsync(x => x.Username == user.Username, ct);
+        return created ?? user;
     }
 
     public Task<User?> GetByIdAsync(int id, CancellationToken ct = default)

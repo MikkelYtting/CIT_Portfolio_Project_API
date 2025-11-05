@@ -1,5 +1,8 @@
 using CIT_Portfolio_Project_API.Application.Managers.Interfaces;
+using CIT_Portfolio_Project_API.Infrastructure.Security;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel;
 
 namespace CIT_Portfolio_Project_API.Web.Controllers;
 
@@ -8,7 +11,8 @@ namespace CIT_Portfolio_Project_API.Web.Controllers;
 public class MoviesController : ControllerBase
 {
     private readonly IMovieManager _manager;
-    public MoviesController(IMovieManager manager) { _manager = manager; }
+    private readonly ISearchManager _searchManager;
+    public MoviesController(IMovieManager manager, ISearchManager searchManager) { _manager = manager; _searchManager = searchManager; }
 
     [HttpGet]
     public async Task<IActionResult> Get([FromQuery] int page = 1, [FromQuery] int pageSize = 20, CancellationToken ct = default)
@@ -22,10 +26,20 @@ public class MoviesController : ControllerBase
     }
 
     [HttpGet("search")]
-    public async Task<IActionResult> Search([FromQuery] string query, [FromQuery] int page = 1, [FromQuery] int pageSize = 20, CancellationToken ct = default)
-    => Ok(await _manager.SearchAsync(query, page, pageSize, ct));
+    [Authorize]
+    public async Task<IActionResult> Search([FromQuery, DefaultValue("dark knight")] string query, [FromQuery] int page = 1, [FromQuery] int pageSize = 20, CancellationToken ct = default)
+    {
+        var userId = User.GetUserId();
+        if (userId is null || userId <= 0) return Unauthorized();
+        return Ok(await _searchManager.StringSearchAsync(userId.Value, query, page, pageSize, ct));
+    }
 
     [HttpGet("structured")]
-    public async Task<IActionResult> Structured([FromQuery] string? title, [FromQuery] string? plot, [FromQuery] string? characters, [FromQuery] string? person, [FromQuery] int page = 1, [FromQuery] int pageSize = 20, CancellationToken ct = default)
-    => Ok(await _manager.StructuredSearchAsync(title, plot, characters, person, page, pageSize, ct));
+    [Authorize]
+    public async Task<IActionResult> Structured([FromQuery, DefaultValue("dark knight")] string? title, [FromQuery, DefaultValue("")] string? plot, [FromQuery, DefaultValue("")] string? characters, [FromQuery, DefaultValue("Christian Bale")] string? person, [FromQuery] int page = 1, [FromQuery] int pageSize = 20, CancellationToken ct = default)
+    {
+        var userId = User.GetUserId();
+        if (userId is null || userId <= 0) return Unauthorized();
+        return Ok(await _searchManager.StructuredSearchAsync(userId.Value, title, plot, characters, person, page, pageSize, ct));
+    }
 }

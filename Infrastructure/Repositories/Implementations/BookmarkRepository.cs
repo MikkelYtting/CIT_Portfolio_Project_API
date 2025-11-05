@@ -22,7 +22,6 @@ public class BookmarkRepository : IBookmarkRepository
 
     public async Task DeleteAsync(int userId, string tconst, CancellationToken ct = default)
     {
-        // Assuming a remove function exists. If not, implement via table delete.
-        await _db.Database.ExecuteSqlInterpolatedAsync($"select delete_bookmark({userId}, {tconst})", ct);
+        await _db.ExecuteDeleteBookmarkAsync(userId, tconst, ct);
     }
 }

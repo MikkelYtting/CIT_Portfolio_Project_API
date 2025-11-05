@@ -62,14 +62,18 @@ public class MovieDetailTests
         Assert.IsTrue(results.Count > 0);
     }
 
-    // RuntimeMinutes only
+    // RuntimeMinutes 
     [DataTestMethod]
-    [DataRow(null)]
-    [DataRow(0)]
-    [DataRow(1)]
-    [DataRow(int.MaxValue - 2)]
-    [DataRow(int.MaxValue - 1)]
-    [DataRow(int.MaxValue)]
+    [DataRow(null)] // null allowed -> valid
+    [DataRow(0)] // at lower boundary -> valid
+    [DataRow(1)] // just above lower boundary -> valid
+    [DataRow(2)] // near lower boundary -> valid
+    [DataRow(90)] // mid-range typical -> valid
+    [DataRow(120)] // mid-range typical -> valid
+    [DataRow(150)] // mid-range typical -> valid
+    [DataRow(int.MaxValue)] // at upper boundary -> valid
+    [DataRow(int.MaxValue - 1)] // just below upper boundary -> valid
+    [DataRow(int.MaxValue - 2)] // near upper boundary -> valid
     public void MovieDetail_RuntimeMinutes_ShouldPass(int? runtime)
     {
         // Arrange
@@ -82,8 +86,14 @@ public class MovieDetailTests
     }
 
     [DataTestMethod]
-    [DataRow(-1)]
-    [DataRow(-5)]
+    [DataRow(-1)] // just below lower boundary -> invalid
+    [DataRow(-2)] // moderately below lower boundary -> invalid
+    [DataRow(-3)] // slightly further below lower boundary -> invalid
+    [DataRow(-10)] // clearly below lower boundary -> invalid
+    [DataRow(-50)] // mid-range negative -> invalid
+    [DataRow(-500)] // deeper mid-range negative -> invalid
+    [DataRow(-100)] // far below lower boundary -> invalid
+    [DataRow(int.MinValue)] // extreme below lower boundary -> invalid
     public void MovieDetail_RuntimeMinutes_ShouldFail(int runtime)
     {
         // Arrange

@@ -88,6 +88,43 @@ public class RatingTests
         Assert.IsTrue(results.Count > 0);
     }
 
+    
+    [DataTestMethod]
+    [DataRow(0.0)] // at lower boundary -> valid
+    [DataRow(0.1)] // just above lower boundary -> valid
+    [DataRow(1.0)] // near lower boundary -> valid
+    [DataRow(10.0)] // at upper boundary -> valid
+    [DataRow(9.9)] // just below upper boundary -> valid
+    [DataRow(9.0)] // near upper boundary -> valid
+    public void Rating_AverageRating_Boundaries_ShouldPass(double avg)
+    {
+        // Arrange
+        var model = CreateRating("tt123", avg, votes: 1);
+        // Act
+        var ok = TryValidateModel(model, out var results);
+        // Assert
+        Assert.IsTrue(ok, $"Expected valid for avg={avg}, but was invalid: {string.Join(", ", results)}");
+        Assert.AreEqual(0, results.Count);
+    }
+
+    [DataTestMethod]
+    [DataRow(-0.1)] // just below lower boundary -> invalid
+    [DataRow(-1.0)] // moderately below lower boundary -> invalid
+    [DataRow(-10.0)] // far below lower boundary -> invalid
+    [DataRow(10.1)] // just above upper boundary -> invalid
+    [DataRow(11.0)] // moderately above upper boundary -> invalid
+    [DataRow(100.0)] // far above upper boundary -> invalid
+    public void Rating_AverageRating_Boundaries_ShouldFail(double avg)
+    {
+        // Arrange
+        var model = CreateRating("tt123", avg, votes: 1);
+        // Act
+        var ok = TryValidateModel(model, out var results);
+        // Assert
+        Assert.IsFalse(ok, $"Expected invalid for avg={avg}, but validation passed");
+        Assert.IsTrue(results.Count > 0);
+    }
+
     // NumVotes only
     [DataTestMethod]
     [DataRow(0)]

@@ -14,12 +14,12 @@ public class BookmarksController : ControllerBase
     public BookmarksController(IBookmarkManager manager) { _manager = manager; }
 
     [HttpGet]
-    public async Task<IActionResult> Get(int userId, CancellationToken ct)
+    public async Task<IActionResult> Get(int userId, [FromQuery] int page = 1, [FromQuery] int pageSize = 20, CancellationToken ct = default)
     {
         var tokenUserId = User.GetUserId();
         if (tokenUserId is null || tokenUserId <= 0) return Unauthorized();
         if (tokenUserId.Value != userId) return Forbid();
-        return Ok(await _manager.GetAsync(tokenUserId.Value, ct));
+        return Ok(await _manager.GetAsync(tokenUserId.Value, page, pageSize, ct));
     }
 
     public record AddBookmarkRequest(string Tconst, string? Note);
