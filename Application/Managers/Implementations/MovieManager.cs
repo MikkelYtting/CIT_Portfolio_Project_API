@@ -12,7 +12,7 @@ public class MovieManager : IMovieManager
     public MovieManager(IMovieRepository repo, IMapper mapper) { _repo = repo; _mapper = mapper; }
 
     /// <summary>
-    /// Henter film og tilføjer HATEOAS-links + pagination links (self/prev/next).
+    /// Fetch movies and attach HATEOAS links + pagination links (self/prev/next).
     /// </summary>
     public async Task<PageDto<MovieDto>> GetMoviesAsync(int page, int pageSize, CancellationToken ct = default)
     {

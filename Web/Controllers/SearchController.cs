@@ -11,6 +11,7 @@ namespace CIT_Portfolio_Project_API.Web.Controllers;
 [Authorize]
 public class SearchController : ControllerBase
 {
+    // Exposes search endpoints (free-text and structured). Delegates to the search manager.
     private readonly ISearchManager _manager;
     public SearchController(ISearchManager manager) { _manager = manager; }
 

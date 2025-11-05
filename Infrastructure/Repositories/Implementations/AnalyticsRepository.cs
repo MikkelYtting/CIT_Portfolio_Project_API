@@ -5,20 +5,27 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CIT_Portfolio_Project_API.Infrastructure.Repositories.Implementations;
 
+/// <summary>
+/// Analytics queries delegated to DB functions (popular actors, similarity, words, etc.).
+/// </summary>
 public class AnalyticsRepository : IAnalyticsRepository
 {
     private readonly AppDbContext _db;
     public AnalyticsRepository(AppDbContext db) => _db = db;
 
+    /// <summary>Popular actors for a given title (DB function call).</summary>
     public Task<IEnumerable<PopularActorRow>> PopularActorsInMovieAsync(string tconst, CancellationToken ct = default)
         => _db.CallPopularActorsInMovie(tconst).ToListAsync(ct).ContinueWith(t => (IEnumerable<PopularActorRow>)t.Result, ct);
 
+    /// <summary>Similar movies for a given title (DB function call).</summary>
     public Task<IEnumerable<SimilarTitleRow>> SimilarMoviesAsync(string tconst, CancellationToken ct = default)
         => _db.CallSimilarMovies(tconst).ToListAsync(ct).ContinueWith(t => (IEnumerable<SimilarTitleRow>)t.Result, ct);
 
+    /// <summary>Top words for people matching the given name (DB function call).</summary>
     public Task<IEnumerable<PersonWordRow>> PersonWordsAsync(string name, CancellationToken ct = default)
         => _db.CallPersonWords(name).ToListAsync(ct).ContinueWith(t => (IEnumerable<PersonWordRow>)t.Result, ct);
 
+    /// <summary>Co-players for the given actor (DB function call).</summary>
     public Task<IEnumerable<CoPlayerRow>> CoPlayersAsync(string actor, CancellationToken ct = default)
         => _db.CallCoPlayers(actor).ToListAsync(ct).ContinueWith(t => (IEnumerable<CoPlayerRow>)t.Result, ct);
 

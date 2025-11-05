@@ -14,8 +14,8 @@ public class AuthManager : IAuthManager
     { _users = users; _hasher = hasher; _jwt = jwt; }
 
     /// <summary>
-    /// Logger brugeren ind: tjekker brugernavn + kodeord og returnerer JWT hvis ok.
-    /// Returnerer null ved forkert login (ingen detaljer lækkes).
+    /// Authenticates a user and issues a short-lived JWT on success.
+    /// Returns null on invalid credentials to avoid leaking which field failed.
     /// </summary>
     public async Task<LoginResponse?> LoginAsync(LoginRequest request, CancellationToken ct = default)
     {

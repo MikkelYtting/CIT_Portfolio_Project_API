@@ -10,8 +10,8 @@ public class SearchManager : ISearchManager
     public SearchManager(ISearchRepository repo) { _repo = repo; }
 
     /// <summary>
-    /// Tekst-søgning. Vi bygger pagination-links (self/prev/next) så klienten kan bladre.
-    /// Bemærk: her er fokus på præsentation, ikke på selve søge-algoritmen.
+    /// Free-text search. Builds HATEOAS pagination links (self/prev/next) so clients can paginate.
+    /// Note: this layer focuses on shaping results, not implementing the search algorithm.
     /// </summary>
     public async Task<PageDto<SearchDto>> StringSearchAsync(int userId, string text, int page, int pageSize, CancellationToken ct = default)
     {
@@ -26,7 +26,7 @@ public class SearchManager : ISearchManager
     }
 
     /// <summary>
-    /// Struktureret søgning. Samme pagination-links som ovenfor, men med flere parametre.
+    /// Structured search. Same pagination link approach as above, but with multiple filters.
     /// </summary>
     public async Task<PageDto<SearchDto>> StructuredSearchAsync(int userId, string? title, string? plot, string? characters, string? person, int page, int pageSize, CancellationToken ct = default)
     {
@@ -62,7 +62,7 @@ public class SearchManager : ISearchManager
     }
 
     /// <summary>
-    /// Tilføjer self/prev/next links til siden. Simpel men vigtig UX-detalje.
+    /// Adds self/prev/next links. Small but important UX detail for discoverability.
     /// </summary>
     private static void AddPageLinks<T>(PageDto<T> dto, string basePath)
     {

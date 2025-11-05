@@ -10,18 +10,21 @@ namespace CIT_Portfolio_Project_API.Web.Controllers;
 [Route("api/[controller]")]
 public class MoviesController : ControllerBase
 {
+    // Exposes read-only movie resources (list, details, search) and delegates to the movie manager.
     private readonly IMovieManager _manager;
     private readonly ISearchManager _searchManager;
     public MoviesController(IMovieManager manager, ISearchManager searchManager) { _manager = manager; _searchManager = searchManager; }
 
     [HttpGet]
+    // List movies with pagination (page defaults to 1, pageSize to 20).
     public async Task<IActionResult> Get([FromQuery] int page = 1, [FromQuery] int pageSize = 20, CancellationToken ct = default)
     => Ok(await _manager.GetMoviesAsync(page, pageSize, ct));
 
     [HttpGet("{tconst}")]
+    // Get a single movie by its stable ID (tconst). 404 if not found.
     public async Task<IActionResult> GetById(string tconst, CancellationToken ct)
     {
-    var dto = await _manager.GetByIdAsync(tconst, ct);
+        var dto = await _manager.GetByIdAsync(tconst, ct);
         return dto is null ? NotFound() : Ok(dto);
     }
 

@@ -197,7 +197,6 @@ app.MapControllers();
 // app.MapGet("/", () => Results.Redirect("/swagger"));
 
 // Log which connection source is being used (without secrets)
-// Log which connection source is being used (without secrets)
 try
 {
 	var csb = new Npgsql.NpgsqlConnectionStringBuilder(connectionString);

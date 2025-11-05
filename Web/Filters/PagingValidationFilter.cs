@@ -5,6 +5,7 @@ namespace CIT_Portfolio_Project_API.Web.Filters;
 
 public class PagingValidationFilter : IAsyncActionFilter
 {
+    // Validates common paging query parameters for all endpoints (rejects invalid page/pageSize early).
     public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
     {
         var q = context.HttpContext.Request.Query;
@@ -24,6 +25,7 @@ public class PagingValidationFilter : IAsyncActionFilter
                 return;
             }
         }
+        // Continue if paging parameters are valid or not provided.
         await next();
     }
 }

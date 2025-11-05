@@ -8,6 +8,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CIT_Portfolio_Project_API.Infrastructure.Repositories.Implementations;
 
+/// <summary>
+/// EF Core-backed people queries and projections.
+/// </summary>
 public class PersonRepository : IPersonRepository
 {
     private readonly AppDbContext _db;
@@ -17,6 +20,7 @@ public class PersonRepository : IPersonRepository
         _db = db; _mapper = mapper;
     }
 
+    /// <summary>Returns a paged list of people using projection mapping.</summary>
     public async Task<PageDto<PersonDto>> GetPeopleAsync(int page, int pageSize, CancellationToken ct = default)
     {
         var query = _db.Persons.AsQueryable();
@@ -27,6 +31,7 @@ public class PersonRepository : IPersonRepository
         return new PageDto<PersonDto> { Page = page, PageSize = pageSize, Total = total, Items = items };
     }
 
+    /// <summary>Finds a person by nconst; null if not found.</summary>
     public Task<Person?> GetByIdAsync(string nconst, CancellationToken ct = default)
         => _db.Persons.FirstOrDefaultAsync(p => p.Nconst == nconst, ct);
 }
