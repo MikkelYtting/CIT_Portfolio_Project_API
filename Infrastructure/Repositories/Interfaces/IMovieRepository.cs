@@ -12,11 +12,4 @@ public interface IMovieRepository
     Task<PageDto<MovieDto>> GetMoviesAsync(int page, int pageSize, CancellationToken ct = default);
     /// <summary>Finds a movie entity by tconst; null if not found.</summary>
     Task<Movie?> GetByIdAsync(string tconst, CancellationToken ct = default);
-<<<<<<< HEAD
-    /// <summary>Performs free-text search and returns a paged projection.</summary>
-    Task<PageDto<MovieDto>> SearchAsync(string query, int page, int pageSize, CancellationToken ct = default);
-    /// <summary>Performs structured search (title/plot/characters/person) and returns a paged projection.</summary>
-    Task<PageDto<MovieDto>> StructuredSearchAsync(string? title, string? plot, string? characters, string? person, int page, int pageSize, CancellationToken ct = default);
-=======
->>>>>>> upstream/main
 }
