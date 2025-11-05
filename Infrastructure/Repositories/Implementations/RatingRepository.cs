@@ -1,5 +1,6 @@
 using CIT_Portfolio_Project_API.Infrastructure.Persistence;
 using CIT_Portfolio_Project_API.Infrastructure.Repositories.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace CIT_Portfolio_Project_API.Infrastructure.Repositories.Implementations;
 
@@ -12,4 +13,7 @@ public class RatingRepository : IRatingRepository
     {
         await _db.ExecuteRateAsync(userId, tconst, value, ct);
     }
+
+    public async Task<IEnumerable<CIT_Portfolio_Project_API.Infrastructure.Persistence.PgSqlFunctionResults.UserRatingHistoryRow>> GetUserRatingHistoryAsync(int userId, CancellationToken ct = default)
+        => await _db.CallUserRatingHistory(userId).ToListAsync(ct);
 }

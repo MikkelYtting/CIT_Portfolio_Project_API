@@ -41,16 +41,37 @@ public class SearchManager : ISearchManager
         return dto;
     }
 
+    public async Task<PageDto<SearchHistoryDto>> GetSearchHistoryAsync(int userId, int page, int pageSize, CancellationToken ct = default)
+    {
+        var rows = (await _repo.GetUserSearchHistoryAsync(userId, ct)).ToList();
+        var total = rows.Count;
+        var items = rows
+            .OrderByDescending(r => r.SearchedAt)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .Select(r => new SearchHistoryDto
+            {
+                Text = r.Text,
+                SearchedAt = r.SearchedAt,
+                Links = new List<LinkDto> { new("repeat", $"/api/search?userId={userId}&query={Uri.EscapeDataString(r.Text)}") }
+            })
+            .ToList();
+        var dto = new PageDto<SearchHistoryDto> { Page = page, PageSize = pageSize, Total = total, Items = items };
+        AddPageLinks(dto, $"/api/users/{userId}/history/search?");
+        return dto;
+    }
+
     /// <summary>
     /// Tilføjer self/prev/next links til siden. Simpel men vigtig UX-detalje.
     /// </summary>
     private static void AddPageLinks<T>(PageDto<T> dto, string basePath)
     {
-        dto.Links.Add(new LinkDto("self", $"{basePath}&page={dto.Page}&pageSize={dto.PageSize}"));
+        var sep = basePath.Contains('?') ? (basePath.EndsWith('?') ? string.Empty : "&") : "?";
+        dto.Links.Add(new LinkDto("self", $"{basePath}{sep}page={dto.Page}&pageSize={dto.PageSize}"));
         if (dto.Page > 1)
-            dto.Links.Add(new LinkDto("prev", $"{basePath}&page={dto.Page - 1}&pageSize={dto.PageSize}"));
+            dto.Links.Add(new LinkDto("prev", $"{basePath}{sep}page={dto.Page - 1}&pageSize={dto.PageSize}"));
         var totalPages = (int)Math.Ceiling(dto.Total / (double)dto.PageSize);
         if (dto.Page < Math.Max(totalPages, 1))
-            dto.Links.Add(new LinkDto("next", $"{basePath}&page={dto.Page + 1}&pageSize={dto.PageSize}"));
+            dto.Links.Add(new LinkDto("next", $"{basePath}{sep}page={dto.Page + 1}&pageSize={dto.PageSize}"));
     }
 }

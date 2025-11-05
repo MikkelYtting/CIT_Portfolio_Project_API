@@ -7,3 +7,18 @@ dotnet test .\\test\\CIT_Portfolio_Project_API.IntegrationTests\\CIT_Portfolio_P
 
 unit tests:
 dotnet test .\test\CIT_Portfolio_Project_API.UnitTests\CIT_Portfolio_Project_API.UnitTests.csproj --no-restore --no-build
+
+
+
+
+Shut down lingering build servers:
+dotnet build-server shutdown
+
+
+Clean, restore, and build (separately):
+dotnet clean
+dotnet restore
+dotnet build -m
+
+Timed the full sequence:
+Measure-Command { dotnet clean; dotnet restore; dotnet build -m } | Select-Object -ExpandProperty TotalSeconds

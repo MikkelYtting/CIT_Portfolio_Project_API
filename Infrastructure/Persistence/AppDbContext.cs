@@ -35,6 +35,8 @@ public class AppDbContext : DbContext
     public DbSet<ExactMatchRow> ExactMatchRows => Set<ExactMatchRow>();
     public DbSet<BestMatchRow> BestMatchRows => Set<BestMatchRow>();
     public DbSet<CoPlayerRow> CoPlayerRows => Set<CoPlayerRow>();
+    public DbSet<UserRatingHistoryRow> UserRatingHistoryRows => Set<UserRatingHistoryRow>();
+    public DbSet<UserSearchHistoryRow> UserSearchHistoryRows => Set<UserSearchHistoryRow>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -66,6 +68,8 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<ExactMatchRow>().HasNoKey();
         modelBuilder.Entity<BestMatchRow>().HasNoKey();
         modelBuilder.Entity<CoPlayerRow>().HasNoKey();
+    modelBuilder.Entity<UserRatingHistoryRow>().HasNoKey();
+    modelBuilder.Entity<UserSearchHistoryRow>().HasNoKey();
 
         // Map entities to actual table/column names from the provided SQL scripts
         modelBuilder.Entity<Movie>(entity =>
@@ -153,4 +157,11 @@ public class AppDbContext : DbContext
 
     public IQueryable<BestMatchRow> CallBestMatch(string? w1, string? w2 = null, string? w3 = null)
         => BestMatchRows.FromSqlInterpolated($"select * from best_match_query({w1}, {w2}, {w3})");
+
+    // User activity (history)
+    public IQueryable<UserRatingHistoryRow> CallUserRatingHistory(int userId)
+        => UserRatingHistoryRows.FromSqlInterpolated($"select * from get_user_rating_history({userId})");
+
+    public IQueryable<UserSearchHistoryRow> CallUserSearchHistory(int userId)
+        => UserSearchHistoryRows.FromSqlInterpolated($"select * from get_user_search_history({userId})");
 }

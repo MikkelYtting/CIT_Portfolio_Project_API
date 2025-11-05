@@ -15,4 +15,7 @@ public class SearchRepository : ISearchRepository
 
     public async Task<IEnumerable<StructuredSearchRow>> StructuredSearchAsync(int userId, string? title, string? plot, string? characters, string? person, CancellationToken ct = default)
         => await _db.CallStructuredStringSearch(userId, title, plot, characters, person).ToListAsync(ct);
+
+    public async Task<IEnumerable<UserSearchHistoryRow>> GetUserSearchHistoryAsync(int userId, CancellationToken ct = default)
+        => await _db.CallUserSearchHistory(userId).ToListAsync(ct);
 }

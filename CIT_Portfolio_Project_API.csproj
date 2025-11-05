@@ -4,12 +4,17 @@
     <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <!-- Exclude the nested test/ directory from default item includes to avoid copying it into output -->
+    <DefaultItemExcludes>$(DefaultItemExcludes);test\**\*</DefaultItemExcludes>
   </PropertyGroup>
 
   <!-- Exclude the nested integration test project sources from this app project build -->
   <ItemGroup>
     <Compile Remove="test\**\*.cs" />
-    <None Include="test\**\*" Exclude="test\**\bin\**;test\**\obj\**" />
+    <!-- Ensure no items under test/ are even considered by this project to keep evaluation/build fast -->
+    <None Remove="test\**\*" />
+    <Content Remove="test\**\*" />
+    <EmbeddedResource Remove="test\**\*" />
   </ItemGroup>
 
   
